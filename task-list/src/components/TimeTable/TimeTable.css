@@ -1,0 +1,33 @@
+.time-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.time-table th,
+.time-table td {
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.time-table th {
+  background-color: #ccc;
+}
+
+.time-table td {
+  text-align: left;
+  vertical-align: top;
+}
+
+.time-table div {
+  margin: 0 5px;
+}
+
+.time-table td button {
+  float: right;
+  margin-left: 10px;
+}
+
+.task-input {
+  padding-top: 20px;
+  position: absolute;
+}
