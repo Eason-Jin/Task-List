@@ -152,7 +152,7 @@ const handleCheckboxChange = (id, day) => {
         </tbody>
       </table>
 
-      <TaskInput onAddTask={handleAddTask} />
+      <TaskInput className="task-input" onAddTask={handleAddTask} />
     </div>
   );
 };
