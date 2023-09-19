@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./TimeTable.css";
+import TaskInput from "./TaskInput";
 
 const TimeTable = () => {
   const [tasks, setTasks] = useState([
@@ -123,6 +124,7 @@ const TimeTable = () => {
             ))}
         </tbody>
       </table>
+      <TaskInput/>
     </div>
   );
 };
