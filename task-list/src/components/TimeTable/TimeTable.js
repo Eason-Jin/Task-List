@@ -16,7 +16,7 @@ const TimeTable = () => {
         {
           id: 2,
           task: "Task 2",
-          time: "9:00 AM",
+          time: "10:00 AM",
           completed: false,
         },
       ],
@@ -27,13 +27,13 @@ const TimeTable = () => {
         {
           id: 3,
           task: "Task 3",
-          time: "10:00 AM",
+          time: "11:00 AM",
           completed: false,
         },
         {
           id: 4,
           task: "Task 4",
-          time: "10:00 AM",
+          time: "12:00 PM",
           completed: false,
         },
       ],
@@ -44,13 +44,13 @@ const TimeTable = () => {
         {
           id: 5,
           task: "Task 5",
-          time: "11:00 AM",
+          time: "1:00 PM",
           completed: false,
         },
         {
           id: 6,
           task: "Task 6",
-          time: "11:00 AM",
+          time: "2:00 PM",
           completed: false,
         },
       ],
@@ -61,7 +61,7 @@ const TimeTable = () => {
         {
           id: 7,
           task: "Task 7",
-          time: "12:00 PM",
+          time: "3:00 PM",
           completed: false,
         },
       ],
@@ -72,14 +72,30 @@ const TimeTable = () => {
     },
   ]);
 
-  const handleCheckboxChange = (id, day) => {
+  
+const handleCheckboxChange = (id, day) => {
+  const newTasks = tasks.map((taskDay) => {
+    if (taskDay.day === day) {
+      taskDay.tasks = taskDay.tasks.map((task) => {
+        if (task.id === id) {
+          task.completed = !task.completed;
+        }
+        return task;
+      });
+    }
+    return taskDay;
+  });
+  setTasks(newTasks);
+};
+
+  const handleAddTask = (task) => {
     const newTasks = tasks.map((taskDay) => {
-      if (taskDay.day === day) {
-        taskDay.tasks = taskDay.tasks.map((task) => {
-          if (task.id === id) {
-            task.completed = !task.completed;
-          }
-          return task;
+      if (taskDay.day === task.day) {
+        taskDay.tasks.push({
+          id: Math.random(),
+          task: task.task,
+          time: task.time,
+          completed: false,
         });
       }
       return taskDay;
@@ -124,7 +140,8 @@ const TimeTable = () => {
             ))}
         </tbody>
       </table>
-      <TaskInput/>
+
+      <TaskInput onAddTask={handleAddTask} />
     </div>
   );
 };
