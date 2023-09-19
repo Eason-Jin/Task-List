@@ -10,13 +10,13 @@ const TimeTable = () => {
         {
           id: 1,
           task: "Task 1",
-          time: "9:00 AM",
+          time: "9:00",
           completed: false,
         },
         {
           id: 2,
           task: "Task 2",
-          time: "10:00 AM",
+          time: "10:00",
           completed: false,
         },
       ],
@@ -27,13 +27,13 @@ const TimeTable = () => {
         {
           id: 3,
           task: "Task 3",
-          time: "11:00 AM",
+          time: "11:00",
           completed: false,
         },
         {
           id: 4,
           task: "Task 4",
-          time: "12:00 PM",
+          time: "12:00",
           completed: false,
         },
       ],
@@ -44,13 +44,13 @@ const TimeTable = () => {
         {
           id: 5,
           task: "Task 5",
-          time: "1:00 PM",
+          time: "13:00",
           completed: false,
         },
         {
           id: 6,
           task: "Task 6",
-          time: "2:00 PM",
+          time: "14:00",
           completed: false,
         },
       ],
@@ -61,7 +61,7 @@ const TimeTable = () => {
         {
           id: 7,
           task: "Task 7",
-          time: "3:00 PM",
+          time: "15:00",
           completed: false,
         },
       ],
@@ -131,10 +131,10 @@ const handleCheckboxChange = (id, day) => {
             .fill(null)
             .map((_, index) => (
               <tr key={index}>
-                <td>{index + 9}:00 AM</td>
+                <td>{index + 9}:00</td>
                 {tasks.map((taskDay) => (
                   <td key={taskDay.day}>
-                    {taskDay.tasks.filter((task) => task.time === `${index + 9}:00 AM`).map((task) => (
+                    {taskDay.tasks.filter((task) => task.time === `${index + 9}:00`).map((task) => (
                       <div key={task.id}>
                         <input
                           type="checkbox"
