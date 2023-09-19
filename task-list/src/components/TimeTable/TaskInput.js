@@ -23,6 +23,7 @@ const TaskInput = ({ onAddTask }) => {
       time,
       task,
     });
+    setTask("");
   };
 
   return (

@@ -103,6 +103,16 @@ const handleCheckboxChange = (id, day) => {
     setTasks(newTasks);
   };
 
+  const handleDeleteTask = (id, day) => {
+    const newTasks = tasks.map((taskDay) => {
+      if (taskDay.day === day) {
+        taskDay.tasks = taskDay.tasks.filter((task) => task.id !== id);
+      }
+      return taskDay;
+    });
+    setTasks(newTasks);
+  };
+
   return (
     <div className="time-table">
       <table>
@@ -132,6 +142,7 @@ const handleCheckboxChange = (id, day) => {
                           onChange={() => handleCheckboxChange(task.id, taskDay.day)}
                         />
                         {task.task}
+                        <button onClick={() => handleDeleteTask(task.id, taskDay.day)}>X</button>
                       </div>
                     ))}
                   </td>

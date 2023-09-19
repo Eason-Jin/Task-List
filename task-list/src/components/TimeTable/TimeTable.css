@@ -12,3 +12,17 @@
 .time-table th {
   background-color: #ccc;
 }
+
+.time-table td {
+  text-align: left;
+  vertical-align: top;
+}
+
+.time-table div {
+  margin: 0 5px;
+}
+
+.time-table td button {
+  float: right;
+  margin-left: 10px;
+}
