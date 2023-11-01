@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./TimeTable.css";
 import TaskInput from "./TaskInput";
 
@@ -10,7 +10,11 @@ class Task {
   }
 }
 
-// Some hard coded value, remove afterwards
+// Function to save tasks to local storage
+const saveToLocalStorage = (updatedTasks) => {
+  localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+};
+
 const TimeTable = () => {
   const [tasks, setTasks] = useState([
     {
@@ -36,6 +40,14 @@ const TimeTable = () => {
   ]);
 
 
+  // Load tasks from local storage
+  useEffect(() => {
+    const storedTasks = localStorage.getItem("tasks");
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+  }, []);
+
   const handleCheckboxChange = (task, day) => {
     const newTasks = tasks.map((taskDay) => {
       if (taskDay.day === day) {
@@ -49,6 +61,9 @@ const TimeTable = () => {
       return taskDay;
     });
     setTasks(newTasks);
+
+    // Save the updated tasks to localStorage
+    saveToLocalStorage(newTasks);
   };
 
   const handleAddTask = (task) => {
@@ -59,7 +74,10 @@ const TimeTable = () => {
       return taskDay;
     });
     setTasks(newTasks);
-  };  
+
+    // Save the updated tasks to localStorage
+    saveToLocalStorage(newTasks);
+  };
 
   const handleDeleteTask = (task, day) => {
     const newTasks = tasks.map((taskDay) => {
@@ -70,6 +88,9 @@ const TimeTable = () => {
       return taskDay;
     });
     setTasks(newTasks);
+
+    // Save the updated tasks to localStorage
+    saveToLocalStorage(newTasks);
   };
 
   return (
@@ -116,5 +137,6 @@ const TimeTable = () => {
     </div>
   );
 };
+
 
 export default TimeTable;
