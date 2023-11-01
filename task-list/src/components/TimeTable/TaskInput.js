@@ -18,12 +18,14 @@ const TaskInput = ({ onAddTask }) => {
   };
 
   const handleAddTaskClick = () => {
-    onAddTask({
-      day,
-      time,
-      task,
-    });
-    setTask("");
+    if (task.trim() !== "") {
+      onAddTask({
+        day,
+        time,
+        task,
+      });
+      setTask("");
+    }
   };
 
   return (
