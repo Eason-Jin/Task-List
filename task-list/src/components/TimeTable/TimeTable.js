@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./TimeTable.css";
 import TaskInput from "./TaskInput";
+import Completed from "./Completed";
 
 class Task {
   constructor(task, time, completed = false) {
@@ -10,12 +11,15 @@ class Task {
   }
 }
 
-// Function to save tasks to local storage
+// Save tasks to local storage
 const saveToLocalStorage = (updatedTasks) => {
   localStorage.setItem("tasks", JSON.stringify(updatedTasks));
 };
 
+
+
 const TimeTable = () => {
+  const [completedTasks, setCompletedTasks] = useState([]);
   const [tasks, setTasks] = useState([
     {
       day: "Monday",
@@ -45,6 +49,14 @@ const TimeTable = () => {
     const storedTasks = localStorage.getItem("tasks");
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
+    }
+  }, []);
+
+  // Load completed tasks from local storage
+  useEffect(() => {
+    const storedTasks = localStorage.getItem("completedTasks");
+    if (storedTasks) {
+      setCompletedTasks(JSON.parse(storedTasks));
     }
   }, []);
 
@@ -82,16 +94,26 @@ const TimeTable = () => {
   const handleDeleteTask = (task, day) => {
     const newTasks = tasks.map((taskDay) => {
       if (taskDay.day === day) {
-        // Filter returns a new array with the elements that meets the callback condition, so filter out the ones not equal to the task
+        // If the task is completed, add it to the completed tasks array
+        if (task.completed) {
+          const updatedCompletedTasks = [...completedTasks, task];
+          setCompletedTasks(updatedCompletedTasks);
+          // Save the updated completed tasks to localStorage
+          localStorage.setItem("completedTasks", JSON.stringify(updatedCompletedTasks));
+        }
+        // Filter returns a new array with the elements that meet the callback condition, so filter out the ones not equal to the task
         taskDay.tasks = taskDay.tasks.filter((t) => t !== task);
       }
       return taskDay;
     });
     setTasks(newTasks);
-
+  
     // Save the updated tasks to localStorage
     saveToLocalStorage(newTasks);
   };
+  
+  
+  
 
   return (
     <div className="time-table">
@@ -134,6 +156,7 @@ const TimeTable = () => {
         </tbody>
       </table>
       <TaskInput className="task-input" onAddTask={handleAddTask} />
+      <Completed completedTasks={completedTasks} setCompletedTasks={setCompletedTasks} />
     </div>
   );
 };
