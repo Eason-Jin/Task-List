@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./TaskInput.css";
 
 const TaskInput = ({ onAddTask }) => {
   const [day, setDay] = useState("");

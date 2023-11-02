@@ -113,17 +113,17 @@ function App() {
 
   return (
     <div className='App'>
-      <div className='time-table'>
+      <div>
         <TimeTable
           tasks={tasks}
           handleCheckboxChange={handleCheckboxChange}
           handleDeleteTask={handleDeleteTask}
         />
       </div>
-      <div className='task-input'>
+      <div>
         <TaskInput onAddTask={handleAddTask} />
       </div>
-      <div className='completed'>
+      <div>
         <Completed
           completedTasks={completedTasks}
           setCompletedTasks={setCompletedTasks}

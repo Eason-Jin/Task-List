@@ -1,4 +1,5 @@
 import React from "react";
+import "./Completed.css";
 
 const Completed = ({ completedTasks, setCompletedTasks }) => {
   const handleClearCompleted = () => {

@@ -1,4 +1,5 @@
 import React from "react";
+import "./TimeTable.css";
 
 const TimeTable = ({ tasks, handleCheckboxChange, handleDeleteTask }) => {
   return (
