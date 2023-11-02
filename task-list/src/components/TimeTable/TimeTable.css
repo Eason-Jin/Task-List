@@ -7,6 +7,7 @@
 .time-table td {
   border: 1px solid black;
   padding: 5px;
+  min-width: 100px;
 }
 
 .time-table th {
@@ -30,4 +31,8 @@
 .task-input {
   padding-top: 20px;
   position: absolute;
+}
+
+.completed li {
+  
 }

@@ -18,7 +18,7 @@ const Completed = ({ completedTasks, setCompletedTasks }) => {
   };
 
   return (
-    <div>
+    <div className="completed">
       <h1>Completed</h1>
       <button onClick={handleClearCompleted}>Clear Completed</button>
       <ul>

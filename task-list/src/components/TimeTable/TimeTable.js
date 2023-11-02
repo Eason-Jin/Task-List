@@ -156,7 +156,7 @@ const TimeTable = () => {
         </tbody>
       </table>
       <TaskInput className="task-input" onAddTask={handleAddTask} />
-      <Completed completedTasks={completedTasks} setCompletedTasks={setCompletedTasks} />
+      <Completed className="completed" completedTasks={completedTasks} setCompletedTasks={setCompletedTasks} />
     </div>
   );
 };
