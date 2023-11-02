@@ -1,18 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 const Completed = ({ completedTasks, setCompletedTasks }) => {
-  // Load tasks from local storage (you can keep this part if needed)
-  useEffect(() => {
-    const storedTasks = localStorage.getItem("completedTasks");
-    if (storedTasks) {
-      setCompletedTasks(JSON.parse(storedTasks));
-    }
-  });
-
   const handleClearCompleted = () => {
     // Clear the completed list in state
     setCompletedTasks([]);
-    
+
     // Clear the completed list in local storage
     localStorage.removeItem("completedTasks");
   };
@@ -23,13 +15,11 @@ const Completed = ({ completedTasks, setCompletedTasks }) => {
       <button onClick={handleClearCompleted}>Clear Completed</button>
       <ul>
         {completedTasks.map((task, index) => (
-          <li key={index}>
-            {task.task}
-          </li>
+          <li key={index}>{task.task}</li>
         ))}
       </ul>
     </div>
   );
-}
+};
 
 export default Completed;
