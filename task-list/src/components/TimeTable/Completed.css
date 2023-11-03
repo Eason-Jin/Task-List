@@ -1,0 +1,61 @@
+:root {
+  --space: 30px;
+}
+
+.completed {
+  margin-top: calc(var(--space) - 5px);
+  margin-bottom: calc(var(--space) + 5px);
+  margin-right: var(--space);
+  margin-left: var(--space);
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: calc(100vh - var(--space)*2);
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  border: 5px solid #ccc;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}
+
+.completed h1 {
+  text-align: center;
+  font-size: 40px;
+  margin: 10px;
+  font-family: 'Brush Script MT', cursive;
+  color: #FFD700;
+}
+
+.completed ul {
+  list-style-type: disc;
+  padding: 0 10px;
+  margin: 0;
+}
+
+.completed li {
+  font-size: 16px;
+  border-bottom: 1px solid #ccc;
+  padding: 5px 0;
+}
+
+.completed button {
+  background-color: #FFD700;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  font-family: 'Courier New', monospace;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.completed button:hover {
+  background-color: #FFC400;
+}

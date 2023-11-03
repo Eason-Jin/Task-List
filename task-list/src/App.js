@@ -112,25 +112,22 @@ function App() {
   }
 
   return (
-    <div className='App'>
-      <div>
-        <TimeTable
-          tasks={tasks}
-          handleCheckboxChange={handleCheckboxChange}
-          handleDeleteTask={handleDeleteTask}
-        />
+    <div className="app">
+      <div className="left">
+        <div>
+          <TimeTable tasks={tasks} handleCheckboxChange={handleCheckboxChange} handleDeleteTask={handleDeleteTask} />
+        </div>
+        <div>
+          <TaskInput onAddTask={handleAddTask} />
+        </div>
       </div>
-      <div>
-        <TaskInput onAddTask={handleAddTask} />
-      </div>
-      <div>
-        <Completed
-          completedTasks={completedTasks}
-          setCompletedTasks={setCompletedTasks}
-        />
+      <div className="right">
+        <div>
+          <Completed completedTasks={completedTasks} setCompletedTasks={setCompletedTasks} />
+        </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default App

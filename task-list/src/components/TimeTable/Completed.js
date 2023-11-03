@@ -12,8 +12,8 @@ const Completed = ({ completedTasks, setCompletedTasks }) => {
 
   return (
     <div className="completed">
-      <h1>Completed</h1>
-      <button onClick={handleClearCompleted}>Clear Completed</button>
+      <h1>COMPLETED</h1>
+      <button onClick={handleClearCompleted}>CLEAR</button>
       <ul>
         {completedTasks.map((task, index) => (
           <li key={index}>{task.task}</li>
