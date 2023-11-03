@@ -16,7 +16,7 @@ const Completed = ({ completedTasks, setCompletedTasks }) => {
       <button onClick={handleClearCompleted}>CLEAR</button>
       <ul>
         {completedTasks.map((task, index) => (
-          <li key={index}>{task.task}</li>
+          <li key={index}><input type="checkbox" checked />{task.task}</li>
         ))}
       </ul>
     </div>
