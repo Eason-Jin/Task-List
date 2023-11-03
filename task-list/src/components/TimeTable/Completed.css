@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Aclonica');
+@import url('https://fonts.googleapis.com/css?family=Kalam');
 
 :root {
   --space: 30px;
@@ -12,7 +13,7 @@
   position: absolute;
   right: 0;
   top: 0;
-  height: calc(100vh - var(--space)*2);
+  height: calc(100vh - var(--space) * 2);
   width: 30%;
   display: flex;
   flex-direction: column;
@@ -29,7 +30,7 @@
   margin-top: 20px;
   margin-bottom: 5px;
   font-family: 'Aclonica', sans-serif;
-  color: #FFD700;
+  color: #ffd700;
   letter-spacing: 5px;
 }
 
@@ -41,23 +42,24 @@
 
 .completed li {
   list-style-type: none;
-  font-size: 16px;
+  font-size: 20px;
   border-bottom: 1px solid #ccc;
   padding: 5px 0;
   display: flex;
-  align-items: center; 
+  align-items: center;
+  font-family: 'Kalam';
 }
 
-.completed li input[type="checkbox"] {
+.completed li input[type='checkbox'] {
   accent-color: rgb(255, 255, 128);
   margin-right: 10px;
   display: block;
-  width: 20px;
-  height: 20px;
+  width: calc(var(--space) - 5px);
+  height: calc(var(--space) - 5px);
 }
 
 .completed button {
-  background-color: #FFD700;
+  background-color: #ffd700;
   color: white;
   border: none;
   border-radius: 5px;
@@ -75,5 +77,5 @@
 }
 
 .completed button:hover {
-  background-color: #FFC400;
+  background-color: #ffc400;
 }
