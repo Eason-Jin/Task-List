@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./TaskInput.css";
 
-const TaskInput = ({ onAddTask }) => {
+const TaskInput = ({ onAddTask, tasks, setTasks}) => {
   const [day, setDay] = useState("");
   const [time, setTime] = useState("");
   const [task, setTask] = useState("");
@@ -27,6 +27,35 @@ const TaskInput = ({ onAddTask }) => {
       });
       setTask("");
     }
+  };
+
+  const handleClearTasks = () => {
+    // Clear the completed list in state
+    setTasks([
+      {
+        day: 'Monday',
+        tasks: []
+      },
+      {
+        day: 'Tuesday',
+        tasks: []
+      },
+      {
+        day: 'Wednesday',
+        tasks: []
+      },
+      {
+        day: 'Thursday',
+        tasks: []
+      },
+      {
+        day: 'Friday',
+        tasks: []
+      }
+    ]);
+
+    // Clear the completed list in local storage
+    localStorage.removeItem("tasks");
   };
 
   return (
@@ -55,7 +84,8 @@ const TaskInput = ({ onAddTask }) => {
         value={task}
         onChange={handleTaskChange}
       />
-      <button onClick={handleAddTaskClick}>Add task</button>
+      <button onClick={handleAddTaskClick}>ADD</button>
+      <button onClick={handleClearTasks}>CLEAR ALL</button>
     </div>
   );
 };

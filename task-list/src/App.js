@@ -118,7 +118,7 @@ function App() {
           <TimeTable tasks={tasks} handleCheckboxChange={handleCheckboxChange} handleDeleteTask={handleDeleteTask} />
         </div>
         <div>
-          <TaskInput onAddTask={handleAddTask} />
+          <TaskInput onAddTask={handleAddTask} tasks={tasks} setTasks={setTasks}/>
         </div>
       </div>
       <div className="right">
