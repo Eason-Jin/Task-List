@@ -1,5 +1,7 @@
 :root {
   --space: 30px;
+  --width: 65vw;
+  --padding-horizontal: 10px; /* Adjust the horizontal padding */
 }
 
 .time-table {
@@ -7,10 +9,11 @@
   margin-top: calc(var(--space) - 5px);
   margin-right: var(--space);
   margin-left: var(--space);
-  padding: 10px;
-  max-width: calc(70vw - var(--space) * 2);
+  padding: var(--padding-horizontal) calc(var(--space) - 5px); /* Adjust the padding */
+  max-width: 100%; /* Set the max-width to 100% to fit within the div */
   border: #ccc 5px solid;
   border-radius: 20px;
+  width: var(--width); /* Set the width to 70vw for the whole table */
 }
 
 .time-table th,
@@ -19,19 +22,17 @@
   padding: 5px;
   text-align: left;
   vertical-align: top;
-  /* max-width: 10vw; */
 }
 
 .time-column {
   white-space: nowrap;
+  min-width: 20px; /* Set a minimum width for the "Time" column */
 }
 
 .day-column {
-  max-width: 10vw;
-}
-
-.time-table div {
-  margin: 0 5px;
+  min-width: calc((var(--width) - var(--space) * 2 - 100px) / 5); /* Calculate the width for day columns */
+  max-width: calc(20vw / 5); /* Set a maximum width for day columns */
+  overflow-wrap: break-word;
 }
 
 .time-table td button {
