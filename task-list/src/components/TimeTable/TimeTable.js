@@ -20,7 +20,7 @@ const TimeTable = ({ tasks, handleCheckboxChange, handleDeleteTask }) => {
             .fill(null)
             .map((_, index) => (
               <tr key={index}>
-                <td>{index + 9}:00</td>
+                <td className="time">{index + 9}:00</td>
                 {tasks.map((taskDay) => (
                   <td key={taskDay.day}>
                     {taskDay.tasks

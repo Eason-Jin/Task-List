@@ -7,7 +7,6 @@
   margin-top: calc(var(--space) - 5px);
   margin-right: var(--space);
   margin-left: var(--space);
-  width: 70%;
   max-width: calc(70vw - var(--space) * 2);
   border: #ccc 5px solid;
   border-radius: 20px;
@@ -27,13 +26,28 @@
 .time-table td {
   text-align: left;
   vertical-align: top;
+  max-width: 10vw;
+  min-width: 10vw;
+  /* overflow-x: auto; */
+  inline-size: 100px;
+  overflow-wrap: break-word;
 }
+
 
 .time-table div {
   margin: 0 5px;
 }
 
 .time-table td button {
-  float: right;
+  /* float: right; */
   margin-left: 10px;
+  display: inline-block;
+}
+
+.time-table input {
+  display: inline-block;
+}
+
+.time-table .time {
+  width: fit-content;
 }
