@@ -7,12 +7,12 @@ const TimeTable = ({ tasks, handleCheckboxChange, handleDeleteTask }) => {
       <table>
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Monday</th>
-            <th>Tuesday</th>
-            <th>Wednesday</th>
-            <th>Thursday</th>
-            <th>Friday</th>
+            <th className="time-column">Time</th>
+            <th className="day-column">Monday</th>
+            <th className="day-column">Tuesday</th>
+            <th className="day-column">Wednesday</th>
+            <th className="day-column">Thursday</th>
+            <th className="day-column">Friday</th>
           </tr>
         </thead>
         <tbody>
@@ -20,9 +20,9 @@ const TimeTable = ({ tasks, handleCheckboxChange, handleDeleteTask }) => {
             .fill(null)
             .map((_, index) => (
               <tr key={index}>
-                <td className="time">{index + 9}:00</td>
+                <td className="time-column">{index + 9}:00</td>
                 {tasks.map((taskDay) => (
-                  <td key={taskDay.day}>
+                  <td className="day-column" key={taskDay.day}>
                     {taskDay.tasks
                       .filter((task) => task.time === `${index + 9}:00`)
                       .map((task) => (
