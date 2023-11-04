@@ -17,12 +17,19 @@
   overflow-y: auto;
 }
 
-.time-table th,
+.time-table th {
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+  vertical-align: top;
+}
+
 .time-table td {
   border: 1px solid black;
   padding: 5px;
   text-align: left;
   vertical-align: top;
+  height: calc((70vh - 20px) / 9 - 5px); 
 }
 
 .time-column {
