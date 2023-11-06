@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import './App.css'
 import TimeTable from './components/TimeTable/TimeTable'
-import TaskInput from './components/TimeTable/TaskInput'
-import Completed from './components/TimeTable/Completed'
+import TaskInput from './components/TaskInput/TaskInput'
+import Completed from './components/Completed/Completed'
 
 function App() {
   class Task {
