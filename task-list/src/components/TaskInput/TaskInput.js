@@ -27,7 +27,7 @@ const TaskInput = ({ onAddTask, tasks, setTasks, message, setMessage }) => {
       });
       setTask("");
     } else {
-      setMessage("Please enter a task"); // Set the message
+      setMessage("Please enter a task!"); // Set the message
       setTimeout(() => {
         setMessage("");
       }, 2000);

@@ -68,7 +68,7 @@ function App() {
         success = true;
       }
       if (id === tasks.length - 1 && !success) {
-        setMessage("Please select a day and time")
+        setMessage("Please select a day and time!")
         setTimeout(() => {
           setMessage("");
         }, 2000);
