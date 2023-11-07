@@ -14,6 +14,8 @@ function App() {
   }
 
   const [completedTasks, setCompletedTasks] = useState([])
+  const [message, setMessage] = useState("");
+
   const [tasks, setTasks] = useState([
     {
       day: 'Monday',
@@ -59,9 +61,17 @@ function App() {
   }, [])
 
   const handleAddTask = task => {
-    const newTasks = tasks.map(taskDay => {
+    const newTasks = tasks.map((taskDay, id) => {
+      var success = false;
       if (taskDay.day === task.day) {
         taskDay.tasks.push(new Task(task.task, task.time))
+        success = true;
+      }
+      if (id === tasks.length - 1 && !success) {
+        setMessage("Please select a day and time")
+        setTimeout(() => {
+          setMessage("");
+        }, 2000);
       }
       return taskDay
     })
@@ -118,7 +128,7 @@ function App() {
           <TimeTable tasks={tasks} handleCheckboxChange={handleCheckboxChange} handleDeleteTask={handleDeleteTask} />
         </div>
         <div>
-          <TaskInput onAddTask={handleAddTask} tasks={tasks} setTasks={setTasks}/>
+          <TaskInput onAddTask={handleAddTask} tasks={tasks} setTasks={setTasks} message={message} setMessage={setMessage} />
         </div>
       </div>
       <div className="right">

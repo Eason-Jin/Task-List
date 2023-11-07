@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./TaskInput.css";
 
-const TaskInput = ({ onAddTask, tasks, setTasks}) => {
+const TaskInput = ({ onAddTask, tasks, setTasks, message, setMessage }) => {
   const [day, setDay] = useState("");
   const [time, setTime] = useState("");
   const [task, setTask] = useState("");
@@ -26,6 +26,11 @@ const TaskInput = ({ onAddTask, tasks, setTasks}) => {
         task,
       });
       setTask("");
+    } else {
+      setMessage("Please enter a task"); // Set the message
+      setTimeout(() => {
+        setMessage("");
+      }, 2000);
     }
   };
 
@@ -86,6 +91,7 @@ const TaskInput = ({ onAddTask, tasks, setTasks}) => {
       />
       <button onClick={handleAddTaskClick}>ADD</button>
       <button onClick={handleClearTasks}>CLEAR ALL</button>
+      <div className="msg">{message}</div>
     </div>
   );
 };
