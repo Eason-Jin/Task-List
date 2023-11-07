@@ -6,6 +6,8 @@ const TaskInput = ({ onAddTask, tasks, setTasks, message, setMessage }) => {
   const [time, setTime] = useState("");
   const [task, setTask] = useState("");
 
+  let messageTimeout;
+
   const handleDayChange = (event) => {
     setDay(event.target.value);
   };
@@ -27,8 +29,13 @@ const TaskInput = ({ onAddTask, tasks, setTasks, message, setMessage }) => {
       });
       setTask("");
     } else {
-      setMessage("Please enter a task!"); // Set the message
-      setTimeout(() => {
+      setMessage("Please enter a task!");
+
+      if (messageTimeout) {
+        clearTimeout(messageTimeout);
+      }
+      
+      messageTimeout = setTimeout(() => {
         setMessage("");
       }, 2000);
     }
