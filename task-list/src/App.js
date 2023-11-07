@@ -62,7 +62,7 @@ function App() {
 
   const handleAddTask = task => {
     const newTasks = tasks.map((taskDay, id) => {
-      var success = false;
+      let success = false;
       if (taskDay.day === task.day) {
         taskDay.tasks.push(new Task(task.task, task.time))
         success = true;
