@@ -1,3 +1,8 @@
+:root {
+  --radius: 3px;
+  --border: #ccc 2px solid;
+}
+
 .task-input {
   padding: 10px 0;
   margin-top: var(--space);
@@ -7,17 +12,50 @@
   border-radius: 20px;
   width: calc(70vw - var(--space));
   min-height: 10vh;
+  background-color: beige;
 }
 
-.task-input select,
-.task-input input,
+.task-input select {
+  display: inline-block;
+  margin: 5px;
+  padding: 5px;
+  font-size: 15px;
+  background-color: #fbfb9b;
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+.task-input input {
+  display: inline-block;
+  margin: 5px;
+  padding: 5px;
+  font-size: 15px;
+  min-width: 30vw;
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
 .task-input button {
   display: inline-block;
   margin: 5px;
+  padding: 5px;
+  font-size: 17px;
+  background-color: #fbfb9b;
+  color: black;
+  border: var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 2px;
+  width: fit-content;
 }
 
 .msg {
-  padding-top: 5px;
   height: 10px;
   font-size: 25px;
   color: red;

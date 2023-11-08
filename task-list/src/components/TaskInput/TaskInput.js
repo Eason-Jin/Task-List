@@ -96,8 +96,8 @@ const TaskInput = ({ onAddTask, tasks, setTasks, message, setMessage }) => {
         value={task}
         onChange={handleTaskChange}
       />
-      <button onClick={handleAddTaskClick}>ADD</button>
-      <button onClick={handleClearTasks}>CLEAR ALL</button>
+      <button onClick={handleAddTaskClick}>Add</button>
+      <button onClick={handleClearTasks}>Clear All</button>
       <div className="msg">{message}</div>
     </div>
   );
