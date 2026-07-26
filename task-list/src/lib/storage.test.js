@@ -211,15 +211,19 @@ describe('loadState', () => {
     expect(loadState().tasks[0].endHour).toBe(24)
   })
 
-  it('widens the hour range to cover the end of a long block', () => {
+  it('respects a saved hour range even when a task falls outside it', () => {
+    // The range is a user setting: narrowing it past a task is warned about in
+    // the UI, not silently undone on the next load.
     saveStateNow({
       ...defaultState(),
       settings: { startHour: 9, endHour: 12, theme: 'system' },
       tasks: [{ id: 'a', title: 'marathon', day: 'Monday', hour: 10, endHour: 19, completed: false }]
     })
     const state = loadState()
-    // endHour is exclusive, so the last occupied row is 18.
-    expect(state.settings.endHour).toBe(18)
+    expect(state.settings.startHour).toBe(9)
+    expect(state.settings.endHour).toBe(12)
+    // The task itself is untouched — it is only hidden.
+    expect(state.tasks[0]).toMatchObject({ hour: 10, endHour: 19 })
   })
 
   it('repairs a partially malformed v2 payload instead of throwing', () => {

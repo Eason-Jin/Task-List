@@ -26,6 +26,17 @@
   color: var(--muted);
 }
 
+.app__settings {
+  flex: none;
+}
+
+@media (max-width: 480px) {
+  /* Icon only once the header gets tight. */
+  .app__settings-text {
+    display: none;
+  }
+}
+
 .app__main {
   flex: 1;
   min-height: 0;

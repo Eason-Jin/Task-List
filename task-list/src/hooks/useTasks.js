@@ -261,4 +261,19 @@ export const nudge = (task, dx, dy, settings) => {
   }
 }
 
+/**
+ * Tasks that would not fit entirely inside an hour range — either starting before
+ * it or running past its end. settings.endHour is the last visible row and task
+ * endHour is exclusive, so a task ending at 22 occupies row 21.
+ */
+export const tasksOutsideRange = (tasks, startHour, endHour) =>
+  tasks
+    .filter(task => {
+      // Unscheduled tasks live in the Inbox and are unaffected by the range.
+      if (task.hour === null || task.day === null) return false
+      const lastRow = (task.endHour ?? task.hour + 1) - 1
+      return task.hour < startHour || lastRow > endHour
+    })
+    .sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day) || a.hour - b.hour)
+
 export { durationOf }

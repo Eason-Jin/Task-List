@@ -221,9 +221,13 @@ const sanitise = value => {
     settingsOut.endHour = settingsOut.startHour
   }
 
+  // Deliberately not widened to cover every task: the day range is a user
+  // setting now, and narrowing it past a task is a choice the app warns about
+  // rather than silently undoes on the next load. Migration still widens, so
+  // imported data is never hidden by a range the user never chose.
   return {
     version: SCHEMA_VERSION,
-    settings: rangeCovering([...tasks, ...completed], settingsOut),
+    settings: settingsOut,
     tasks,
     completed
   }

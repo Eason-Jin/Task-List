@@ -52,7 +52,10 @@ npm run preview    # check the built version locally
   default, so hitting Enter on reflex is the safe outcome.
 - **Undo** as a second net: deleting a task, Complete all, Clear all and Clear completed
   all offer an Undo in the toast afterwards.
-- **Light, dark, or system** theme, remembered between visits.
+- **Settings** (top right) holds the **light / dark / system** theme and the **hours shown**
+  on the grid. Both are remembered between visits.
+- **Narrowing the day** warns you if it would hide a task, naming each one with its day and
+  time range. Nothing is deleted — widening the range brings them straight back.
 - **Responsive** — the grid scrolls on its own below ~900px and the Completed panel moves
   underneath it.
 

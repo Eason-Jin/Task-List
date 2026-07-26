@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reducer, nudge } from './useTasks'
+import { reducer, nudge, tasksOutsideRange } from './useTasks'
 import { defaultState } from '../lib/storage'
 
 const base = () => ({ ...defaultState(), undo: null })
@@ -158,6 +158,65 @@ describe('undo', () => {
     const before = withTask()
     const cleared = reducer(before, { type: 'clearAll' })
     expect(reducer(cleared, { type: 'undo' }).tasks).toEqual(before.tasks)
+  })
+})
+
+describe('tasksOutsideRange', () => {
+  const task = (id, over) => ({
+    id,
+    title: id,
+    day: 'Monday',
+    hour: 9,
+    endHour: 10,
+    ...over
+  })
+
+  it('finds nothing when every task fits', () => {
+    expect(tasksOutsideRange([task('a'), task('b', { hour: 20, endHour: 22 })], 7, 21)).toEqual([])
+  })
+
+  it('flags a task starting before the range', () => {
+    const early = task('early', { hour: 6, endHour: 7 })
+    expect(tasksOutsideRange([early], 7, 21).map(t => t.id)).toEqual(['early'])
+  })
+
+  it('flags a task whose tail runs past the last row', () => {
+    // endHour is exclusive: ending at 22 occupies row 21, which still fits.
+    expect(tasksOutsideRange([task('fits', { hour: 20, endHour: 22 })], 7, 21)).toEqual([])
+    // Ending at 23 occupies row 22, which does not.
+    expect(tasksOutsideRange([task('over', { hour: 20, endHour: 23 })], 7, 21).map(t => t.id)).toEqual(
+      ['over']
+    )
+  })
+
+  it('flags a long task that straddles the whole range', () => {
+    const all = task('all-day', { hour: 6, endHour: 23 })
+    expect(tasksOutsideRange([all], 9, 17).map(t => t.id)).toEqual(['all-day'])
+  })
+
+  it('ignores unscheduled tasks, which the range does not affect', () => {
+    const inbox = task('inbox', { day: null, hour: null, endHour: null })
+    const dayless = task('dayless', { day: null, hour: 3, endHour: 4 })
+    expect(tasksOutsideRange([inbox, dayless], 7, 21)).toEqual([])
+  })
+
+  it('treats a task with no endHour as one hour long', () => {
+    const legacy = { id: 'l', title: 'l', day: 'Monday', hour: 21 }
+    expect(tasksOutsideRange([legacy], 7, 21)).toEqual([])
+    expect(tasksOutsideRange([legacy], 7, 20).map(t => t.id)).toEqual(['l'])
+  })
+
+  it('orders the report by day then time, so the warning reads naturally', () => {
+    const out = tasksOutsideRange(
+      [
+        task('fri', { day: 'Friday', hour: 6, endHour: 7 }),
+        task('mon-late', { day: 'Monday', hour: 23, endHour: 24 }),
+        task('mon-early', { day: 'Monday', hour: 5, endHour: 6 })
+      ],
+      7,
+      21
+    )
+    expect(out.map(t => t.id)).toEqual(['mon-early', 'mon-late', 'fri'])
   })
 })
 

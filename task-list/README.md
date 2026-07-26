@@ -52,8 +52,14 @@ A `null` in either field means the task is unscheduled and shows in the Inbox.
 
 `endHour` is **exclusive** and always at least `hour + 1`, so 9→11 covers the 09:00 and
 10:00 rows. It may be 24 for a task in the final slot of the day. `settings.endHour`, by
-contrast, is the last *row* of the grid, which is why `rangeCovering` compares against
-`endHour - 1`.
+contrast, is the last *row* of the grid — hence the `endHour - 1` comparisons in
+`rangeCovering` and `tasksOutsideRange`.
+
+`settings.startHour` / `endHour` are edited in `SettingsDialog`. `loadState` deliberately
+does **not** widen the stored range to cover every task: the range is a user setting, and
+narrowing it past a task is warned about in the UI rather than silently undone on the next
+load. `migrateV1` still widens, so v1 data is never hidden behind a range the user never
+chose. `tasksOutsideRange` (in `useTasks.js`) drives that warning.
 
 The key name still says `v2` because schema 3 only added `endHour`. Every read path fills
 it in (one hour) when it is missing, so installs written by schema 2 upgrade in place

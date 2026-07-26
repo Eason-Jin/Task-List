@@ -6,9 +6,9 @@ import Inbox from './components/Inbox/Inbox'
 import CompletedPanel from './components/CompletedPanel/CompletedPanel'
 import TaskEditor from './components/TaskEditor/TaskEditor'
 import ConfirmDialog from './components/ConfirmDialog/ConfirmDialog'
+import SettingsDialog from './components/SettingsDialog/SettingsDialog'
 import Toast from './components/Toast/Toast'
-import ThemeToggle from './components/ThemeToggle/ThemeToggle'
-import { useTasks, nudge } from './hooks/useTasks'
+import { useTasks, nudge, tasksOutsideRange } from './hooks/useTasks'
 import { SHORT_DAYS, formatRange } from './lib/constants'
 
 function App() {
@@ -16,6 +16,7 @@ function App() {
   const [editing, setEditing] = useState(null)
   const [composerDefaults, setComposerDefaults] = useState(null)
   const [confirming, setConfirming] = useState(null)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const { theme } = state.settings
 
@@ -57,6 +58,18 @@ function App() {
   }, [])
 
   const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`
+
+  /**
+   * Closing settings while tasks sit outside the visible hours repeats the
+   * warning as a toast, so the dialog is not the only place it is ever mentioned.
+   */
+  const closeSettings = useCallback(() => {
+    setSettingsOpen(false)
+    const hidden = tasksOutsideRange(state.tasks, state.settings.startHour, state.settings.endHour)
+    if (hidden.length > 0) {
+      announce(`${plural(hidden.length, 'task')} hidden outside the visible hours`)
+    }
+  }, [announce, state.tasks, state.settings.startHour, state.settings.endHour])
 
   /**
    * Destructive actions ask first. The undo toast is still the safety net for
@@ -147,10 +160,15 @@ function App() {
             {state.completed.length > 0 && ` · ${state.completed.length} done`}
           </p>
         </div>
-        <ThemeToggle
-          theme={theme}
-          onChange={value => dispatch({ type: 'settings', settings: { theme: value } })}
-        />
+        <button
+          type="button"
+          className="btn app__settings"
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Settings"
+        >
+          <span aria-hidden="true">⚙</span>
+          <span className="app__settings-text">Settings</span>
+        </button>
       </header>
 
       <main className="app__main">
@@ -196,6 +214,14 @@ function App() {
           setEditing(null)
           announce('Task updated')
         }}
+      />
+
+      <SettingsDialog
+        open={settingsOpen}
+        settings={state.settings}
+        tasks={state.tasks}
+        onChange={settings => dispatch({ type: 'settings', settings })}
+        onClose={closeSettings}
       />
 
       <ConfirmDialog

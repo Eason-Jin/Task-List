@@ -122,6 +122,47 @@ describe('App', () => {
     expect(html.slice(completeAll - 120, completeAll)).toContain('disabled')
   })
 
+  it('puts the theme control in the settings dialog, not the header', () => {
+    const html = renderToString(<App />)
+
+    const settingsButton = html.indexOf('aria-label="Settings"')
+    const dialog = html.indexOf('class="settings"')
+    expect(settingsButton).toBeGreaterThan(-1)
+    // The theme radiogroup now lives inside the dialog, after it in the markup.
+    expect(html.indexOf('Colour theme')).toBeGreaterThan(dialog)
+  })
+
+  it('names the task, day and time range of anything outside the visible hours', () => {
+    saveStateNow({
+      ...defaultState(),
+      settings: { startHour: 9, endHour: 17, theme: 'system' },
+      tasks: [
+        { id: 'a', title: 'Early gym', day: 'Wednesday', hour: 6, endHour: 8, completed: false },
+        { id: 'b', title: 'Fits fine', day: 'Monday', hour: 10, endHour: 11, completed: false }
+      ]
+    })
+
+    const html = renderToString(<App />)
+
+    expect(html).toContain('1 task falls outside these hours')
+    expect(html).toContain('Early gym')
+    expect(html).toContain('Wednesday')
+    expect(html).toContain('06:00 – 08:00')
+    // The task that fits is not named in the warning.
+    const warning = html.slice(html.indexOf('settings__warn'))
+    expect(warning).not.toContain('Fits fine')
+  })
+
+  it('shows no warning when the range covers everything', () => {
+    saveStateNow({
+      ...defaultState(),
+      tasks: [{ id: 'a', title: 'standup', day: 'Monday', hour: 9, endHour: 10, completed: false }]
+    })
+
+    const html = renderToString(<App />)
+    expect(html).not.toContain('settings__warn')
+  })
+
   it('draws a task written before durations existed as a single row', () => {
     saveStateNow({
       ...defaultState(),
