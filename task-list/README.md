@@ -14,6 +14,8 @@ Run these from this directory (`task-list/`).
 | `npm run build` | Static production build into `dist/` |
 | `npm run preview` | Serve the built `dist/` locally to check it |
 | `npm test` | Run the test suite once |
+| `npm run test:watch` | Re-run tests as files change |
+| `npm run test:coverage` | Run with coverage; fails under 90% on any file |
 
 ## Layout
 
@@ -75,6 +77,28 @@ never rendered anywhere — surface in the Unscheduled strip rather than staying
 
 Migration is the one place a bug would destroy real data, so it is covered by
 `src/lib/storage.test.js`. Run `npm test` after touching `storage.js`.
+
+## Testing
+
+`npm run test:coverage` enforces **90% statements, branches, functions and lines per
+file** — `perFile: true`, so a well-covered module cannot mask a bare one. Adding a
+component without tests fails the run.
+
+There is no @testing-library dependency; `src/test/dom.jsx` has the few helpers the app
+needs. Three things about it are worth knowing before writing a test:
+
+- **Use `act()`, not `flushSync`.** Drag events are dispatched at React's *continuous*
+  priority and those updates do not flush inside `flushSync`. Every helper wraps `act()`.
+- **React has no `pointerenter` listener.** It synthesises `onPointerEnter` from
+  `pointerover`, and only fires it when `relatedTarget` is outside the tree — hence
+  `pointerEnter()` dispatches `pointerover` with a null `relatedTarget`.
+- **Assigning `node.value` is invisible to React.** It installs its own `value` property on
+  controlled inputs to dedupe changes, so `type()` and `change()` go through the prototype
+  setter instead.
+
+jsdom lacks `HTMLDialogElement.showModal` and `PointerEvent`; `src/test/setup.js` shims
+both. Several dialogs stay mounted and reuse labels like Save and Cancel, so
+`el.button(text, scope)` takes a scope selector.
 
 ## Grid layout
 

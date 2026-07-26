@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   BACKUP_KEY,
   LEGACY_COMPLETED_KEY,
@@ -7,7 +7,9 @@ import {
   STORAGE_KEY,
   loadState,
   migrateV1,
+  saveState,
   saveStateNow,
+  createId,
   defaultState
 } from './storage'
 
@@ -32,6 +34,10 @@ const seedV1 = () => {
 
 beforeEach(() => {
   localStorage.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe('migrateV1', () => {
@@ -242,5 +248,179 @@ describe('loadState', () => {
     expect(state.completed).toEqual([])
     expect(state.settings.theme).toBe('system')
     expect(state.settings.startHour).toBe(defaultState().settings.startHour)
+  })
+})
+
+describe('storage that misbehaves', () => {
+  it('falls back to defaults when reading throws, as in some privacy modes', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('access denied')
+    })
+    expect(loadState()).toEqual(defaultState())
+  })
+
+  it('reports a failed write rather than throwing', () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota exceeded')
+    })
+    expect(saveStateNow(defaultState())).toBe(false)
+  })
+
+  it('still shows migrated tasks when the backup cannot be written', () => {
+    seedV1()
+    const setItem = vi.spyOn(Storage.prototype, 'setItem')
+    setItem.mockImplementationOnce(() => {
+      throw new Error('quota exceeded') // the backup
+    })
+
+    // The migration result is returned even though the backup failed.
+    expect(loadState().tasks).toHaveLength(4)
+  })
+
+  it('reports a successful write', () => {
+    expect(saveStateNow(defaultState())).toBe(true)
+  })
+})
+
+describe('saveState', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('waits before writing, so a burst of edits touches storage once', () => {
+    saveState({ ...defaultState(), tasks: [] })
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+
+    vi.advanceTimersByTime(150)
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)).version).toBe(SCHEMA_VERSION)
+  })
+
+  it('collapses rapid calls into the last one', () => {
+    const first = { ...defaultState(), tasks: [{ id: 'a', title: 'first', day: null, hour: null, endHour: null, completed: false, createdAt: 1 }] }
+    const second = { ...defaultState(), tasks: [{ id: 'b', title: 'second', day: null, hour: null, endHour: null, completed: false, createdAt: 1 }] }
+
+    saveState(first)
+    vi.advanceTimersByTime(100)
+    saveState(second)
+    vi.advanceTimersByTime(150)
+
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+    expect(stored.tasks).toHaveLength(1)
+    expect(stored.tasks[0].title).toBe('second')
+  })
+
+  it('accepts a custom delay', () => {
+    saveState(defaultState(), 500)
+    vi.advanceTimersByTime(499)
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+    vi.advanceTimersByTime(1)
+    expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull()
+  })
+})
+
+describe('settings repair', () => {
+  it('pulls an end hour that precedes the start up to meet it', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 3,
+        settings: { startHour: 14, endHour: 9, theme: 'light' },
+        tasks: [],
+        completed: []
+      })
+    )
+    const state = loadState()
+    expect(state.settings.startHour).toBe(14)
+    expect(state.settings.endHour).toBe(14)
+  })
+
+  it('clamps hours outside the day', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 3,
+        settings: { startHour: -5, endHour: 99, theme: 'dark' },
+        tasks: [],
+        completed: []
+      })
+    )
+    const state = loadState()
+    expect(state.settings.startHour).toBe(0)
+    expect(state.settings.endHour).toBe(23)
+    expect(state.settings.theme).toBe('dark')
+  })
+
+  it('drops a task whose hour is not a real time of day', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 3,
+        settings: { startHour: 7, endHour: 21, theme: 'system' },
+        tasks: [{ id: 'a', title: 'odd', day: 'Monday', hour: 99 }],
+        completed: []
+      })
+    )
+    // The hour is unusable, so it becomes unscheduled rather than being lost.
+    expect(loadState().tasks[0]).toMatchObject({ title: 'odd', hour: null, endHour: null })
+  })
+
+  it('ignores a stored value that is not an object at all', () => {
+    localStorage.setItem(STORAGE_KEY, '"just a string"')
+    expect(loadState()).toEqual(defaultState())
+    localStorage.setItem(STORAGE_KEY, 'null')
+    expect(loadState()).toEqual(defaultState())
+  })
+
+  it('keeps a legacy time string on a v2 task', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 2,
+        settings: { startHour: 7, endHour: 21, theme: 'system' },
+        tasks: [{ id: 'a', title: 'stringly', day: 'Monday', hour: '9:00' }],
+        completed: []
+      })
+    )
+    expect(loadState().tasks[0]).toMatchObject({ hour: 9, endHour: 10 })
+  })
+
+  it('invents ids and timestamps when they are missing', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 3,
+        settings: { startHour: 7, endHour: 21, theme: 'system' },
+        tasks: [{ title: 'no id', day: 'Monday', hour: 9, createdAt: 'nope' }],
+        completed: [{ title: 'also none', day: null, hour: 9, completedAt: 'nope' }]
+      })
+    )
+    const state = loadState()
+    expect(typeof state.tasks[0].id).toBe('string')
+    expect(Number.isFinite(state.tasks[0].createdAt)).toBe(true)
+    expect(typeof state.completed[0].id).toBe('string')
+    expect(Number.isFinite(state.completed[0].completedAt)).toBe(true)
+  })
+})
+
+describe('createId', () => {
+  it('falls back to a random string when crypto.randomUUID is unavailable', () => {
+    const original = globalThis.crypto
+    // eslint-disable-next-line no-global-assign
+    Object.defineProperty(globalThis, 'crypto', { value: {}, configurable: true })
+
+    const id = createId()
+    expect(typeof id).toBe('string')
+    expect(id.startsWith('t_')).toBe(true)
+    expect(createId()).not.toBe(id)
+
+    Object.defineProperty(globalThis, 'crypto', { value: original, configurable: true })
+  })
+
+  it('uses crypto.randomUUID when it is there', () => {
+    expect(createId()).not.toBe(createId())
   })
 })

@@ -48,6 +48,110 @@ describe('add', () => {
   })
 })
 
+describe('edit', () => {
+  it('changes the title, day and range together', () => {
+    const state = reducer(withTask(), {
+      type: 'edit',
+      id: 'a',
+      title: 'renamed',
+      day: 'Friday',
+      hour: 14,
+      endHour: 16
+    })
+    expect(state.tasks[0]).toMatchObject({
+      title: 'renamed',
+      day: 'Friday',
+      hour: 14,
+      endHour: 16
+    })
+  })
+
+  it('leaves fields alone when the action omits them', () => {
+    const state = reducer(withTask(), { type: 'edit', id: 'a', title: 'renamed' })
+    expect(state.tasks[0]).toMatchObject({
+      title: 'renamed',
+      day: 'Tuesday',
+      hour: 9,
+      endHour: 12
+    })
+  })
+
+  it('keeps the old title when none is given', () => {
+    const state = reducer(withTask(), { type: 'edit', id: 'a', hour: 10 })
+    expect(state.tasks[0].title).toBe('workshop')
+  })
+
+  it('clears the end when the task is unscheduled', () => {
+    const state = reducer(withTask(), { type: 'edit', id: 'a', hour: null, endHour: 12 })
+    expect(state.tasks[0]).toMatchObject({ hour: null, endHour: null })
+  })
+
+  it('repairs an end at or before the new start', () => {
+    const state = reducer(withTask(), { type: 'edit', id: 'a', hour: 15, endHour: 12 })
+    expect(state.tasks[0].endHour).toBe(16)
+  })
+
+  it('leaves other tasks untouched', () => {
+    const before = {
+      ...base(),
+      tasks: [
+        { id: 'a', title: 'one', day: 'Monday', hour: 9, endHour: 10, completed: false },
+        { id: 'b', title: 'two', day: 'Monday', hour: 11, endHour: 12, completed: false }
+      ]
+    }
+    const state = reducer(before, { type: 'edit', id: 'a', title: 'changed' })
+    expect(state.tasks[1]).toBe(before.tasks[1])
+  })
+})
+
+describe('unknown and no-op actions', () => {
+  it('returns the same state for an unrecognised action', () => {
+    const before = withTask()
+    expect(reducer(before, { type: 'nonsense' })).toBe(before)
+  })
+
+  it('ignores completing, restoring or resizing a task that is not there', () => {
+    const before = withTask()
+    expect(reducer(before, { type: 'complete', id: 'missing' })).toBe(before)
+    expect(reducer(before, { type: 'restore', id: 'missing' })).toBe(before)
+    expect(reducer(before, { type: 'resize', id: 'missing', endHour: 14 }).tasks[0]).toEqual(
+      before.tasks[0]
+    )
+  })
+
+  it('does nothing when clearing lists that are already empty', () => {
+    const empty = base()
+    expect(reducer(empty, { type: 'clearAll' })).toBe(empty)
+    expect(reducer(empty, { type: 'clearCompleted' })).toBe(empty)
+  })
+
+  it('ignores undo and dismissUndo with no snapshot', () => {
+    const empty = base()
+    expect(reducer(empty, { type: 'undo' })).toBe(empty)
+    expect(reducer(empty, { type: 'dismissUndo' })).toBe(empty)
+  })
+
+  it('clears the snapshot on dismissUndo', () => {
+    const deleted = reducer(withTask(), { type: 'delete', id: 'a' })
+    expect(deleted.undo).not.toBeNull()
+    expect(reducer(deleted, { type: 'dismissUndo' }).undo).toBeNull()
+  })
+
+  it('deletes from the completed list when the id is not on the grid', () => {
+    const before = {
+      ...base(),
+      completed: [{ id: 'c', title: 'done', day: null, hour: 9, endHour: 10, completedAt: 1 }]
+    }
+    const state = reducer(before, { type: 'delete', id: 'c' })
+    expect(state.completed).toEqual([])
+  })
+
+  it('merges settings rather than replacing them', () => {
+    const state = reducer(base(), { type: 'settings', settings: { theme: 'dark' } })
+    expect(state.settings).toMatchObject({ theme: 'dark', startHour: 7, endHour: 21 })
+  })
+})
+
 describe('move', () => {
   it('preserves the length of the task', () => {
     const state = reducer(withTask(), { type: 'move', id: 'a', day: 'Friday', hour: 14 })
