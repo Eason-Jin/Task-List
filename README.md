@@ -27,7 +27,10 @@ npm run preview    # check the built version locally
 
 - **Weekly grid**, Monday to Sunday, over a configurable range of hours.
 - **Start and end times** — a task can run for as long as you need and is drawn as a block
-  covering every hour it occupies. Overlapping tasks sit side by side.
+  covering every hour it occupies.
+- **Overlapping tasks sit side by side**, and the day they're on widens so each one stays
+  wide enough to read. Only that day grows; the rest of the week keeps its width, and the
+  grid scrolls sideways if the week no longer fits.
 - **Drag down the calendar** to block out a range: press in the hour you want to start,
   drag to the hour you want to finish, and the composer opens pre-filled with that slot.
   A single click picks one hour.

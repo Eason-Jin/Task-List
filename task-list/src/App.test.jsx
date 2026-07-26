@@ -67,6 +67,47 @@ describe('App', () => {
     expect(html).toContain('09:00 – 13:00')
   })
 
+  it('keeps every day column at the base width when nothing overlaps', () => {
+    saveStateNow({
+      ...defaultState(),
+      tasks: [
+        { id: 'a', title: 'standup', day: 'Tuesday', hour: 9, endHour: 10, completed: false },
+        { id: 'b', title: 'review', day: 'Tuesday', hour: 11, endHour: 12, completed: false }
+      ]
+    })
+
+    const html = renderToString(<App />)
+    // Two tasks on the same day that do not overlap share lane 0.
+    expect(html).toContain('grid-template-columns:var(--time-col) minmax(132px, 1fr)')
+    expect(html).not.toContain('minmax(248px')
+  })
+
+  it('widens only the day whose tasks overlap, so each lane stays readable', () => {
+    saveStateNow({
+      ...defaultState(),
+      tasks: [
+        { id: 'a', title: 'standup', day: 'Tuesday', hour: 9, endHour: 10, completed: false },
+        { id: 'b', title: 'review', day: 'Tuesday', hour: 9, endHour: 10, completed: false },
+        { id: 'c', title: 'call', day: 'Tuesday', hour: 9, endHour: 10, completed: false },
+        { id: 'd', title: 'solo', day: 'Friday', hour: 9, endHour: 10, completed: false }
+      ]
+    })
+
+    const html = renderToString(<App />)
+
+    // Tuesday needs 3 lanes at 124px; Monday and Friday stay at the 132px base.
+    expect(html).toContain(
+      'grid-template-columns:var(--time-col) minmax(132px, 1fr) minmax(372px, 1fr) ' +
+        'minmax(132px, 1fr) minmax(132px, 1fr) minmax(132px, 1fr) minmax(132px, 1fr) ' +
+        'minmax(132px, 1fr)'
+    )
+    // All three tasks are drawn; none is hidden.
+    expect(html).toContain('standup')
+    expect(html).toContain('review')
+    expect(html).toContain('call')
+    expect(html).toContain('--lanes:3')
+  })
+
   it('draws a task written before durations existed as a single row', () => {
     saveStateNow({
       ...defaultState(),

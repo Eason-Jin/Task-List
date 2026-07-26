@@ -85,7 +85,8 @@
   color: var(--muted);
   text-decoration: line-through;
   text-decoration-color: var(--faint);
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .done__meta {

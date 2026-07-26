@@ -6,6 +6,24 @@ import { DAYS, SHORT_DAYS, formatHour, hourRange } from '../../lib/constants'
 const todayName = () => DAYS[(new Date().getDay() + 6) % 7]
 
 /**
+ * A lane narrower than this has no room for a title: the chip spends ~65px on
+ * fixed chrome (accent border, padding, checkbox, delete button, gaps) before any
+ * text. Rather than squeezing lanes, a day with overlapping tasks widens its own
+ * column and the grid scrolls horizontally.
+ */
+const MIN_LANE = 124
+const MIN_DAY = 132
+
+const columnTemplate = layout =>
+  [
+    'var(--time-col)',
+    ...DAYS.map(day => {
+      const lanes = layout.get(day)?.lanes ?? 1
+      return `minmax(${Math.max(MIN_DAY, lanes * MIN_LANE)}px, 1fr)`
+    })
+  ].join(' ')
+
+/**
  * The whole week is one CSS grid: row 1 is the header, then one row per hour.
  * Background cells and task blocks are placed into the same grid explicitly,
  * which is what lets a task span several hours by spanning rows.
@@ -100,7 +118,7 @@ const TimeTable = ({ settings, layout, onDrop, onResize, onCreate, taskProps }) 
         className={`grid${gesture || dragging ? ' grid--busy' : ''}`}
         role="grid"
         aria-label="Weekly schedule"
-        style={{ '--rows': hours.length }}
+        style={{ '--rows': hours.length, gridTemplateColumns: columnTemplate(layout) }}
         onDragStart={() => setDragging(true)}
         onDragEnd={() => {
           setDragging(false)

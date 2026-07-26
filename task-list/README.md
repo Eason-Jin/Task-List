@@ -77,7 +77,22 @@ rows. Row height is fixed (`--row-h`) because spanning tasks cannot let rows gro
 their content.
 
 `useTasks` assigns each task a **lane** per day — the first lane free at its start hour —
-and `--lane` / `--lanes` split the column width so overlapping tasks sit side by side.
+and `--lane` / `--lanes` tile the column so overlapping tasks sit side by side.
+
+Splitting a fixed-width column between lanes does not work: a chip spends ~65px on fixed
+chrome (3px accent border, ~10px padding, 14px checkbox, 18px delete button, gaps) before
+any text, so three lanes in a 132px column leave the title a negative width. Instead each
+day column is sized to hold *its own* lane count at a readable minimum —
+`max(MIN_DAY, lanes * MIN_LANE)` in `columnTemplate` — so only a day that actually has
+overlaps grows, and the grid scrolls horizontally when the week no longer fits.
+
+`grid-template-columns` is therefore set **inline** from the layout, which is why the
+`@media (max-width: 900px)` block only narrows `--time-col`: anything it declared for
+`grid-template-columns` would lose to the inline style.
+
+Titles wrap only at word boundaries (`overflow-wrap: normal`), so a word is never broken
+across lines. A single word too long for its lane is clipped by the line clamp instead, and
+the chip carries a `title` tooltip with the full text.
 
 Both pointer gestures (sweep-to-select a range, drag-the-edge-to-resize) work by reading
 which background cell the pointer is over rather than doing pixel maths, so `.grid--busy`

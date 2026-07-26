@@ -104,6 +104,9 @@ const TaskChip = ({
           className="chip__title"
           onClick={() => onEdit(task)}
           aria-label={`Edit "${task.title}"`}
+          // The title clamps to a couple of lines and never breaks mid-word, so
+          // the full text has to be reachable on hover.
+          title={`${task.title}${task.hour === null ? '' : ` · ${time}`}`}
         >
           <span className="chip__text">{task.title}</span>
           {(showMeta || duration > 1) && <span className="chip__meta">{showMeta ? meta : time}</span>}

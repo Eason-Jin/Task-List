@@ -14,6 +14,9 @@
   --time-col: 68px;
   --row-h: 54px;
   display: grid;
+  /* grid-template-columns is set inline: each day is sized to fit its own lanes
+     at a readable minimum width. min-width lets the grid scroll rather than
+     squeeze when the total exceeds the viewport. */
   grid-template-columns: var(--time-col) repeat(7, minmax(132px, 1fr));
   grid-template-rows: auto repeat(var(--rows), var(--row-h));
   min-width: max-content;
@@ -93,9 +96,10 @@
 }
 
 /* Task blocks sit in the same grid as the cells, one row per hour they cover.
-   --lane / --lanes split the column when tasks overlap in time. */
-/* Lanes tile the column exactly; the 2px padding on each block is what makes the
-   gutter between neighbours, so no block overlaps the one beside it. */
+   --lane / --lanes tile the column exactly when tasks overlap in time; the 2px
+   padding on each block is what makes the gutter between neighbours, so no block
+   overlaps the one beside it. The column itself has already been widened to keep
+   each lane readable. */
 .grid__task {
   z-index: 1;
   display: flex;
@@ -111,9 +115,10 @@
 }
 
 @media (max-width: 900px) {
+  /* Only the time column narrows here; the day columns are sized inline, which
+     would override anything set for grid-template-columns in this block. */
   .grid {
     --time-col: 56px;
-    grid-template-columns: var(--time-col) repeat(7, minmax(112px, 1fr));
   }
 
   .grid__day-long {
