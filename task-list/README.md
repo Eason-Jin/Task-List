@@ -97,3 +97,18 @@ the chip carries a `title` tooltip with the full text.
 Both pointer gestures (sweep-to-select a range, drag-the-edge-to-resize) work by reading
 which background cell the pointer is over rather than doing pixel maths, so `.grid--busy`
 sets `pointer-events: none` on task blocks while a gesture or an HTML5 drag is in flight.
+That class is set on `dragenter`, not `dragstart`, so it also covers a task dragged in from
+the Inbox.
+
+## Drop preview
+
+Dropping preserves a task's length, so the preview highlights every hour the block would
+occupy, not just the hovered cell. `dataTransfer` *values* cannot be read during `dragover`
+— only the list of type names — so `TaskChip` encodes the length in a second type,
+`text/task-span-<n>`, which `spanFromTypes` parses back out. This keeps the preview
+stateless and works regardless of which component the drag started in.
+
+The outline is drawn edge by edge (`--over-first` / `--over-last`) so a multi-hour range
+reads as one block rather than a stack of separate boxes. `dragleave` is handled on the grid
+container and checks `relatedTarget`, because a per-cell `dragleave` fires *after* the next
+cell's `dragover` and makes the highlight flicker.

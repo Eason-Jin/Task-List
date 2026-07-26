@@ -1,8 +1,21 @@
 import React from 'react'
 import './TaskChip.css'
-import { formatHour, formatRange, SHORT_DAYS } from '../../lib/constants'
+import { formatHour, formatRange, SHORT_DAYS, spanOf } from '../../lib/constants'
 
 export const DRAG_TYPE = 'text/task-id'
+
+/**
+ * dataTransfer *values* are unreadable during dragover — only the list of types
+ * is exposed — so the task's length rides along in the type name itself. That
+ * lets the grid preview the whole block as you drag, and works no matter which
+ * component the drag started from.
+ */
+export const SPAN_TYPE = 'text/task-span-'
+
+export const spanFromTypes = types => {
+  const match = Array.from(types ?? []).find(type => type.startsWith(SPAN_TYPE))
+  return Math.max(1, Number(match?.slice(SPAN_TYPE.length)) || 1)
+}
 
 const HOUR_KEYS = {
   ArrowLeft: [-1, 0],
@@ -63,6 +76,7 @@ const TaskChip = ({
 
   const handleDragStart = event => {
     event.dataTransfer.setData(DRAG_TYPE, task.id)
+    event.dataTransfer.setData(`${SPAN_TYPE}${Math.max(1, spanOf(task))}`, '')
     event.dataTransfer.effectAllowed = 'move'
     event.currentTarget.classList.add('chip--dragging')
   }

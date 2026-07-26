@@ -90,8 +90,25 @@
   box-shadow: inset 0 0 0 1px var(--accent);
 }
 
+/* Drop preview for the full duration of the dragged task. The outline is drawn
+   per edge so a multi-hour range reads as one block instead of stacked boxes. */
 .grid__cell--over {
   background: var(--accent-soft);
+  box-shadow: inset 2px 0 0 var(--accent), inset -2px 0 0 var(--accent);
+}
+
+.grid__cell--over-first {
+  box-shadow: inset 2px 0 0 var(--accent), inset -2px 0 0 var(--accent),
+    inset 0 2px 0 var(--accent);
+}
+
+.grid__cell--over-last {
+  box-shadow: inset 2px 0 0 var(--accent), inset -2px 0 0 var(--accent),
+    inset 0 -2px 0 var(--accent);
+}
+
+/* A one-hour task: first and last are the same cell, so it needs all four. */
+.grid__cell--over-first.grid__cell--over-last {
   box-shadow: inset 0 0 0 2px var(--accent);
 }
 

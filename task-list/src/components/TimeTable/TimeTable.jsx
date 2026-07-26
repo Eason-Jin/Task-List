@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import './TimeTable.css'
-import TaskChip, { DRAG_TYPE } from '../TaskChip/TaskChip'
+import TaskChip, { DRAG_TYPE, spanFromTypes } from '../TaskChip/TaskChip'
 import { DAYS, SHORT_DAYS, formatHour, hourRange } from '../../lib/constants'
 
 const todayName = () => DAYS[(new Date().getDay() + 6) % 7]
@@ -40,7 +40,7 @@ const TimeTable = ({ settings, layout, onDrop, onResize, onCreate, taskProps }) 
   const today = todayName()
 
   const [gesture, setGesture] = useState(null)
-  const [dropTarget, setDropTarget] = useState(null)
+  const [dropPreview, setDropPreview] = useState(null)
   const [dragging, setDragging] = useState(false)
   const gestureRef = useRef(null)
   gestureRef.current = gesture
@@ -63,6 +63,22 @@ const TimeTable = ({ settings, layout, onDrop, onResize, onCreate, taskProps }) 
       window.removeEventListener('pointercancel', finish)
     }
   }, [onCreate])
+
+  // A drag can end anywhere, including outside the grid or on Escape, and a
+  // dragend from an Inbox chip never bubbles through here. Window-level cleanup
+  // guarantees the preview and the inert-blocks class do not get stuck on.
+  useEffect(() => {
+    const clear = () => {
+      setDragging(false)
+      setDropPreview(null)
+    }
+    window.addEventListener('dragend', clear)
+    window.addEventListener('drop', clear)
+    return () => {
+      window.removeEventListener('dragend', clear)
+      window.removeEventListener('drop', clear)
+    }
+  }, [])
 
   const startSelect = (day, hour) => event => {
     // Touch needs the vertical drag for scrolling, so it falls back to a tap.
@@ -91,18 +107,37 @@ const TimeTable = ({ settings, layout, onDrop, onResize, onCreate, taskProps }) 
   }
 
   const handleDragOver = (day, hour) => event => {
-    if (!event.dataTransfer.types.includes(DRAG_TYPE)) return
+    const { types } = event.dataTransfer
+    if (!types.includes(DRAG_TYPE)) return
     event.preventDefault()
     event.dataTransfer.dropEffect = 'move'
-    setDropTarget(`${day}|${hour}`)
+    setDropPreview(prev =>
+      prev && prev.day === day && prev.hour === hour
+        ? prev
+        : { day, hour, span: spanFromTypes(types) }
+    )
   }
 
   const handleDrop = (day, hour) => event => {
     const id = event.dataTransfer.getData(DRAG_TYPE)
     if (!id) return
     event.preventDefault()
-    setDropTarget(null)
+    setDropPreview(null)
     onDrop(id, day, hour)
+  }
+
+  /**
+   * Where the dragged task would land: the hovered cell plus however many hours
+   * the task runs for, since dropping preserves its length.
+   */
+  const dropEdge = (day, hour) => {
+    if (!dropPreview || dropPreview.day !== day) return ''
+    const { hour: start, span } = dropPreview
+    if (hour < start || hour >= start + span) return ''
+    let cls = ' grid__cell--over'
+    if (hour === start) cls += ' grid__cell--over-first'
+    if (hour === start + span - 1) cls += ' grid__cell--over-last'
+    return cls
   }
 
   const inSelection = (day, hour) =>
@@ -119,10 +154,13 @@ const TimeTable = ({ settings, layout, onDrop, onResize, onCreate, taskProps }) 
         role="grid"
         aria-label="Weekly schedule"
         style={{ '--rows': hours.length, gridTemplateColumns: columnTemplate(layout) }}
-        onDragStart={() => setDragging(true)}
-        onDragEnd={() => {
-          setDragging(false)
-          setDropTarget(null)
+        // dragenter rather than dragstart, so a task dragged in from the Inbox
+        // also makes the blocks inert and keeps the cells under them droppable.
+        onDragEnter={() => setDragging(true)}
+        // Clearing only when the pointer leaves the grid entirely: a per-cell
+        // dragleave fires after the next cell's dragover and would flicker.
+        onDragLeave={event => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setDropPreview(null)
         }}
       >
         <div className="grid__corner" role="columnheader" style={{ gridColumn: 1, gridRow: 1 }}>
@@ -156,16 +194,15 @@ const TimeTable = ({ settings, layout, onDrop, onResize, onCreate, taskProps }) 
           DAYS.map((day, col) => (
             <div
               key={`${day}|${hour}`}
-              className={`grid__cell${inSelection(day, hour) ? ' grid__cell--picked' : ''}${
-                dropTarget === `${day}|${hour}` ? ' grid__cell--over' : ''
-              }`}
+              className={`grid__cell${
+                inSelection(day, hour) ? ' grid__cell--picked' : ''
+              }${dropEdge(day, hour)}`}
               role="gridcell"
               aria-label={`${day} ${formatHour(hour)}`}
               style={{ gridColumn: col + 2, gridRow: row + 2 }}
               onPointerDown={startSelect(day, hour)}
               onPointerEnter={enterCell(day, hour)}
               onDragOver={handleDragOver(day, hour)}
-              onDragLeave={() => setDropTarget(null)}
               onDrop={handleDrop(day, hour)}
             />
           ))
