@@ -1,12 +1,19 @@
 {
   "name": "tasklist",
-  "version": "1.0.0",
-  "description": "��#\u0000 \u0000T\u0000a\u0000s\u0000k\u0000-\u0000L\u0000i\u0000s\u0000t\u0000\r\u0000 \u0000",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "A weekly task planner that stores everything in the browser. The app lives in task-list/.",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm --prefix task-list run dev",
+    "build": "npm --prefix task-list run build",
+    "preview": "npm --prefix task-list run preview",
+    "test": "npm --prefix task-list run test"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "tasks",
+    "planner",
+    "react"
+  ],
+  "author": "Eason Jin",
   "license": "ISC"
 }

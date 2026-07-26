@@ -1,66 +1,126 @@
-@import url('https://fonts.googleapis.com/css?family=Aclonica');
-@import url('https://fonts.googleapis.com/css?family=Kalam');
-
-:root {
-  --space: 30px;
-  --width: 65vw;
+.grid-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.time-table {
-  border-collapse: collapse;
-  margin-top: calc(var(--space) - 5px);
-  margin-right: var(--space);
-  margin-left: var(--space);
-  padding: 10px 25px;
-  max-width: 100%;
-  height: 70vh;
-  border: #ccc 5px solid;
-  border-radius: 20px;
-  width: var(--width);
-  overflow-y: auto;
-  background-color: beige;
+/* Fixed row height: tasks span whole rows, so the rows cannot grow to fit
+   content the way the old one-task-per-cell layout did. */
+.grid {
+  --time-col: 68px;
+  --row-h: 54px;
+  display: grid;
+  grid-template-columns: var(--time-col) repeat(7, minmax(132px, 1fr));
+  grid-template-rows: auto repeat(var(--rows), var(--row-h));
+  min-width: max-content;
 }
 
-.time-table th {
-  border: 1px solid black;
-  padding: 5px;
+/* While a pointer gesture or an HTML5 drag is running, task blocks must not
+   swallow the events meant for the cells underneath them. */
+.grid--busy {
+  user-select: none;
+}
+
+.grid--busy .grid__task {
+  pointer-events: none;
+}
+
+.grid__corner,
+.grid__day {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-strong);
+  padding: var(--space-3) var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
   text-align: center;
-  vertical-align: top;
-  background-color: #f8e055;
-  font-family: 'Aclonica', sans-serif;
-  font-size: 25px;
 }
 
-.time-table td {
-  border: 1px solid black;
-  padding: 5px;
-  text-align: left;
-  vertical-align: top;
-  height: calc((70vh - 20px) / 9 - 5px); 
+.grid__corner {
+  left: 0;
+  z-index: 4;
+  border-right: 1px solid var(--border);
 }
 
-.time-table td:not(:first-child) {
-  font-family: 'Kalam';
+.grid__day--today {
+  color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent);
 }
 
-.time-column {
-  white-space: nowrap;
-  max-width: 65px;
-  background-color: #fff099;
-  font-family: 'Aclonica', sans-serif;
+.grid__day-short {
+  display: none;
 }
 
-.day-column {
-  min-width: calc((var(--width) - var(--space) * 2 - 100px) / 5);
-  max-width: calc(var(--width) / 5);
-  overflow-wrap: break-word;
+.grid__time {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  text-align: right;
 }
 
-.time-table td button {
-  margin-left: 10px;
-  display: inline-block;
+.grid__cell {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
 }
 
-.time-table input {
-  display: inline-block;
+.grid__cell:hover {
+  background: var(--surface-hover);
+}
+
+/* Hour range being swept out with the pointer. */
+.grid__cell--picked {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.grid__cell--over {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* Task blocks sit in the same grid as the cells, one row per hour they cover.
+   --lane / --lanes split the column when tasks overlap in time. */
+/* Lanes tile the column exactly; the 2px padding on each block is what makes the
+   gutter between neighbours, so no block overlaps the one beside it. */
+.grid__task {
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  padding: 2px;
+  width: calc(100% / var(--lanes));
+  margin-left: calc(var(--lane) * 100% / var(--lanes));
+}
+
+.grid__task > .chip {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    --time-col: 56px;
+    grid-template-columns: var(--time-col) repeat(7, minmax(112px, 1fr));
+  }
+
+  .grid__day-long {
+    display: none;
+  }
+
+  .grid__day-short {
+    display: inline;
+  }
 }
