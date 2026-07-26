@@ -55,11 +55,12 @@ A `null` in either field means the task is unscheduled and shows in the Inbox.
 contrast, is the last *row* of the grid — hence the `endHour - 1` comparisons in
 `rangeCovering` and `tasksOutsideRange`.
 
-`settings.startHour` / `endHour` are edited in `SettingsDialog`. `loadState` deliberately
-does **not** widen the stored range to cover every task: the range is a user setting, and
-narrowing it past a task is warned about in the UI rather than silently undone on the next
-load. `migrateV1` still widens, so v1 data is never hidden behind a range the user never
-chose. `tasksOutsideRange` (in `useTasks.js`) drives that warning.
+`settings.startHour` / `endHour` are edited in `SettingsDialog`, which holds every field as
+a draft and commits only on Save, so Cancel is a true undo. Save is **disabled** while
+`tasksOutsideRange` (in `useTasks.js`) reports anything that would not fit, which is why
+`loadState` no longer widens the stored range to cover every task — the invariant is
+enforced at the point of change instead. `migrateV1` still widens, since v1 data predates
+the setting and must not be hidden behind a range the user never chose.
 
 The key name still says `v2` because schema 3 only added `endHour`. Every read path fills
 it in (one hour) when it is missing, so installs written by schema 2 upgrade in place

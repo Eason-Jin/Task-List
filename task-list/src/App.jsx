@@ -8,7 +8,7 @@ import TaskEditor from './components/TaskEditor/TaskEditor'
 import ConfirmDialog from './components/ConfirmDialog/ConfirmDialog'
 import SettingsDialog from './components/SettingsDialog/SettingsDialog'
 import Toast from './components/Toast/Toast'
-import { useTasks, nudge, tasksOutsideRange } from './hooks/useTasks'
+import { useTasks, nudge } from './hooks/useTasks'
 import { SHORT_DAYS, formatRange } from './lib/constants'
 
 function App() {
@@ -59,17 +59,14 @@ function App() {
 
   const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`
 
-  /**
-   * Closing settings while tasks sit outside the visible hours repeats the
-   * warning as a toast, so the dialog is not the only place it is ever mentioned.
-   */
-  const closeSettings = useCallback(() => {
-    setSettingsOpen(false)
-    const hidden = tasksOutsideRange(state.tasks, state.settings.startHour, state.settings.endHour)
-    if (hidden.length > 0) {
-      announce(`${plural(hidden.length, 'task')} hidden outside the visible hours`)
-    }
-  }, [announce, state.tasks, state.settings.startHour, state.settings.endHour])
+  const saveSettings = useCallback(
+    settings => {
+      dispatch({ type: 'settings', settings })
+      setSettingsOpen(false)
+      announce('Settings saved')
+    },
+    [dispatch, announce]
+  )
 
   /**
    * Destructive actions ask first. The undo toast is still the safety net for
@@ -220,8 +217,8 @@ function App() {
         open={settingsOpen}
         settings={state.settings}
         tasks={state.tasks}
-        onChange={settings => dispatch({ type: 'settings', settings })}
-        onClose={closeSettings}
+        onSave={saveSettings}
+        onClose={() => setSettingsOpen(false)}
       />
 
       <ConfirmDialog

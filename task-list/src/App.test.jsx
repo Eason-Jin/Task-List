@@ -144,7 +144,7 @@ describe('App', () => {
 
     const html = renderToString(<App />)
 
-    expect(html).toContain('1 task falls outside these hours')
+    expect(html).toContain('This task is outside the range:')
     expect(html).toContain('Early gym')
     expect(html).toContain('Wednesday')
     expect(html).toContain('06:00 – 08:00')

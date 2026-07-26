@@ -54,8 +54,9 @@ npm run preview    # check the built version locally
   all offer an Undo in the toast afterwards.
 - **Settings** (top right) holds the **light / dark / system** theme and the **hours shown**
   on the grid. Both are remembered between visits.
-- **Narrowing the day** warns you if it would hide a task, naming each one with its day and
-  time range. Nothing is deleted — widening the range brings them straight back.
+- **Narrowing the day** is refused while it would push a task off the grid. The warning
+  names each offending task with its day and time range, so you can move it or widen the
+  range. Settings apply on **Save**; **Cancel** discards them.
 - **Responsive** — the grid scrolls on its own below ~900px and the Completed panel moves
   underneath it.
 

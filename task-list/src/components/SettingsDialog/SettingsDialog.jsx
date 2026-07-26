@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import './SettingsDialog.css'
 import ThemeToggle from '../ThemeToggle/ThemeToggle'
 import { MAX_HOUR, MIN_HOUR, formatHour, formatRange, hourRange } from '../../lib/constants'
@@ -7,35 +7,37 @@ import { tasksOutsideRange } from '../../hooks/useTasks'
 /**
  * Theme and the visible hours of the day.
  *
- * Changes apply immediately so the grid behind updates as you pick, and the
- * warning below lists any task the current range would push off the grid. It
- * warns rather than blocks: nothing is deleted, and widening the range brings
- * everything straight back.
+ * Everything is edited as a draft and only committed on Save, so Cancel is a true
+ * undo. Saving is refused while any task would fall outside the chosen range —
+ * the warning names them so they can be moved or the range widened.
  */
-const SettingsDialog = ({ open, settings, tasks, onChange, onClose }) => {
+const SettingsDialog = ({ open, settings, tasks, onSave, onClose }) => {
   const dialogRef = useRef(null)
+  const [draft, setDraft] = useState(settings)
 
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
     if (open) {
+      // Start from the saved values every time it opens, discarding any edits
+      // abandoned last time.
+      setDraft(settings)
       if (!dialog.open) dialog.showModal()
     } else if (dialog.open) {
       dialog.close()
     }
+    // Intentionally keyed on `open` alone: re-syncing on every settings change
+    // would fight with the draft being edited.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  const { startHour, endHour, theme } = settings
-  const outside = tasksOutsideRange(tasks, startHour, endHour)
+  const outside = tasksOutsideRange(tasks, draft.startHour, draft.endHour)
+  const blocked = outside.length > 0
 
-  const handleStart = value => {
-    const next = Number(value)
+  const setStart = value => {
+    const startHour = Number(value)
     // Keep the day at least one hour long.
-    onChange({ startHour: next, endHour: Math.max(next, endHour) })
-  }
-
-  const handleEnd = value => {
-    onChange({ endHour: Number(value) })
+    setDraft(prev => ({ ...prev, startHour, endHour: Math.max(startHour, prev.endHour) }))
   }
 
   return (
@@ -46,31 +48,16 @@ const SettingsDialog = ({ open, settings, tasks, onChange, onClose }) => {
       aria-labelledby="settings-title"
     >
       <div className="settings__inner">
-        <header className="settings__head">
-          <h2 className="settings__title" id="settings-title">
-            Settings
-          </h2>
-          <button
-            type="button"
-            className="settings__close"
-            onClick={onClose}
-            aria-label="Close settings"
-          >
-            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
-              <path
-                d="M3 3l10 10M13 3L3 13"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                fill="none"
-              />
-            </svg>
-          </button>
-        </header>
+        <h2 className="settings__title" id="settings-title">
+          Settings
+        </h2>
 
         <section className="settings__group">
           <h3 className="settings__label">Appearance</h3>
-          <ThemeToggle theme={theme} onChange={value => onChange({ theme: value })} />
+          <ThemeToggle
+            theme={draft.theme}
+            onChange={theme => setDraft(prev => ({ ...prev, theme }))}
+          />
         </section>
 
         <section className="settings__group">
@@ -80,8 +67,8 @@ const SettingsDialog = ({ open, settings, tasks, onChange, onClose }) => {
               <span>Day starts</span>
               <select
                 className="field"
-                value={startHour}
-                onChange={event => handleStart(event.target.value)}
+                value={draft.startHour}
+                onChange={event => setStart(event.target.value)}
               >
                 {hourRange(MIN_HOUR, MAX_HOUR).map(hour => (
                   <option key={hour} value={hour}>
@@ -94,10 +81,12 @@ const SettingsDialog = ({ open, settings, tasks, onChange, onClose }) => {
               <span>Day ends</span>
               <select
                 className="field"
-                value={endHour}
-                onChange={event => handleEnd(event.target.value)}
+                value={draft.endHour}
+                onChange={event =>
+                  setDraft(prev => ({ ...prev, endHour: Number(event.target.value) }))
+                }
               >
-                {hourRange(startHour, MAX_HOUR).map(hour => (
+                {hourRange(draft.startHour, MAX_HOUR).map(hour => (
                   <option key={hour} value={hour}>
                     {formatHour(hour)}
                   </option>
@@ -105,18 +94,12 @@ const SettingsDialog = ({ open, settings, tasks, onChange, onClose }) => {
               </select>
             </label>
           </div>
-          <p className="settings__hint">
-            The last row is {formatHour(endHour)}, so a task can run until{' '}
-            {formatHour(endHour + 1)}.
-          </p>
         </section>
 
-        {outside.length > 0 && (
+        {blocked && (
           <section className="settings__warn" role="alert">
             <p className="settings__warn-lead">
-              {outside.length === 1
-                ? '1 task falls outside these hours and is hidden from the grid:'
-                : `${outside.length} tasks fall outside these hours and are hidden from the grid:`}
+              {outside.length === 1 ? 'This task is outside the range:' : 'These tasks are outside the range:'}
             </p>
             <ul className="settings__warn-list">
               {outside.map(task => (
@@ -125,15 +108,21 @@ const SettingsDialog = ({ open, settings, tasks, onChange, onClose }) => {
                 </li>
               ))}
             </ul>
-            <p className="settings__warn-foot">
-              Nothing has been deleted. Widen the range to bring them back.
-            </p>
           </section>
         )}
 
         <div className="settings__actions">
-          <button type="button" className="btn btn--primary" onClick={onClose}>
-            Done
+          <button type="button" className="btn" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => onSave(draft)}
+            disabled={blocked}
+            title={blocked ? 'Widen the range so no task falls outside it' : undefined}
+          >
+            Save
           </button>
         </div>
       </div>
