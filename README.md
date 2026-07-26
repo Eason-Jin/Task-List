@@ -1,25 +1,34 @@
 # Task List
 
-A weekly planner that runs entirely in your browser. No account, no server — every task is
-saved to your browser's local storage, so closing the tab and coming back later keeps
-everything where you left it.
+A modern weekly planner that runs entirely in your browser. No account, no server — every task is saved to your browser's local storage, so closing the tab and coming back later keeps everything where you left it.
+
+Built with Vite, with a light/dark theme, drag-and-drop rescheduling, task durations, undo/redo, and a configurable time range. Fully keyboard accessible and responsive down to 375px.
 
 ## How to use
 
-You need [Node.js](https://nodejs.org/) installed.
+### Deployed
+
+Open the live app at **[eason-jin.github.io/Task-List/](https://eason-jin.github.io/Task-List/)**.
+
+The app runs entirely in your browser. Your tasks are never sent anywhere — they live in your browser's local storage and sync between tabs automatically.
+
+### Local
+
+To run it on your machine, you need [Node.js](https://nodejs.org/) installed.
 
 ```bash
-cd task-list
-npm install
+git clone https://github.com/Eason-Jin/Task-List.git
+cd Task-List/task-list
+npm ci
 npm run dev
 ```
 
 Then open the URL it prints (http://localhost:5173).
 
-To produce a static build you can host anywhere:
+To build a static version you can host anywhere:
 
 ```bash
-npm run build      # outputs to task-list/dist
+npm run build      # outputs to dist/
 npm run preview    # check the built version locally
 ```
 
@@ -85,7 +94,6 @@ The old version had no concept of how long a task took, so imported tasks — an
 created before end times were added — become one-hour blocks. Stretch them by dragging the
 bottom edge.
 
-For build details and the data format, see [`task-list/README.md`](task-list/README.md).
 
 ## Credit
 
