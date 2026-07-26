@@ -7,7 +7,7 @@ import { DAYS, formatHour, hourRange } from '../../lib/constants'
  * files the task under Unscheduled instead of losing it, which is what the v1
  * app did silently.
  */
-const Composer = ({ settings, onAdd, onClearAll, defaults, taskCount = 0 }) => {
+const Composer = ({ settings, onAdd, onCompleteAll, onClearAll, defaults, taskCount = 0 }) => {
   const [title, setTitle] = useState('')
   const [day, setDay] = useState('')
   const [hour, setHour] = useState('')
@@ -140,6 +140,15 @@ const Composer = ({ settings, onAdd, onClearAll, defaults, taskCount = 0 }) => {
 
         <button type="button" className="btn btn--primary" onClick={submit}>
           Add task
+        </button>
+        <button
+          type="button"
+          className="btn"
+          onClick={onCompleteAll}
+          disabled={taskCount === 0}
+          title="Tick off every task on the schedule"
+        >
+          Complete all
         </button>
         <button
           type="button"

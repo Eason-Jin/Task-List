@@ -1,0 +1,38 @@
+.confirm {
+  width: min(400px, calc(100vw - 2rem));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+}
+
+.confirm::backdrop {
+  background: rgb(8 10 14 / 45%);
+  backdrop-filter: blur(2px);
+}
+
+.confirm__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.confirm__title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.confirm__message {
+  font-size: var(--text-base);
+  color: var(--muted);
+}
+
+.confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}

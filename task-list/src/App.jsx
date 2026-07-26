@@ -5,6 +5,7 @@ import Composer from './components/Composer/Composer'
 import Inbox from './components/Inbox/Inbox'
 import CompletedPanel from './components/CompletedPanel/CompletedPanel'
 import TaskEditor from './components/TaskEditor/TaskEditor'
+import ConfirmDialog from './components/ConfirmDialog/ConfirmDialog'
 import Toast from './components/Toast/Toast'
 import ThemeToggle from './components/ThemeToggle/ThemeToggle'
 import { useTasks, nudge } from './hooks/useTasks'
@@ -14,6 +15,7 @@ function App() {
   const { state, dispatch, layout, inbox, toast, announce, undo, dismissToast } = useTasks()
   const [editing, setEditing] = useState(null)
   const [composerDefaults, setComposerDefaults] = useState(null)
+  const [confirming, setConfirming] = useState(null)
 
   const { theme } = state.settings
 
@@ -54,6 +56,59 @@ function App() {
     setComposerDefaults({ day, hour, endHour, at: Date.now() })
   }, [])
 
+  const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`
+
+  /**
+   * Destructive actions ask first. The undo toast is still the safety net for
+   * anything that slips through — this just stops the accidental click.
+   */
+  const askDelete = useCallback(
+    task => {
+      const where =
+        task.day && task.hour !== null
+          ? ` from ${SHORT_DAYS[task.day]} ${formatRange(task.hour, task.endHour)}`
+          : ''
+      setConfirming({
+        title: 'Delete task?',
+        message: `“${task.title}” will be removed${where}.`,
+        confirmLabel: 'Delete',
+        danger: true,
+        run: () => dispatch({ type: 'delete', id: task.id })
+      })
+    },
+    [dispatch]
+  )
+
+  const askCompleteAll = useCallback(() => {
+    setConfirming({
+      title: 'Complete all tasks?',
+      message: `${plural(state.tasks.length, 'task')} will move to the completed list.`,
+      confirmLabel: 'Complete all',
+      danger: false,
+      run: () => dispatch({ type: 'completeAll' })
+    })
+  }, [dispatch, state.tasks.length])
+
+  const askClearAll = useCallback(() => {
+    setConfirming({
+      title: 'Clear all tasks?',
+      message: `${plural(state.tasks.length, 'task')} will be removed from the schedule.`,
+      confirmLabel: 'Clear all',
+      danger: true,
+      run: () => dispatch({ type: 'clearAll' })
+    })
+  }, [dispatch, state.tasks.length])
+
+  const askClearCompleted = useCallback(() => {
+    setConfirming({
+      title: 'Clear completed?',
+      message: `${plural(state.completed.length, 'completed task')} will be removed for good.`,
+      confirmLabel: 'Clear',
+      danger: true,
+      run: () => dispatch({ type: 'clearCompleted' })
+    })
+  }, [dispatch, state.completed.length])
+
   const handleNudge = useCallback(
     (task, dx, dy) => {
       const next = nudge(task, dx, dy, state.settings)
@@ -72,12 +127,12 @@ function App() {
         dispatch({ type: 'complete', id: task.id })
         announce('Completed')
       },
-      onDelete: task => dispatch({ type: 'delete', id: task.id }),
+      onDelete: askDelete,
       onEdit: task => setEditing(task),
       onNudge: handleNudge,
       onResize: handleResize
     }),
-    [dispatch, announce, handleNudge, handleResize]
+    [dispatch, announce, askDelete, handleNudge, handleResize]
   )
 
   const total = state.tasks.length
@@ -105,7 +160,8 @@ function App() {
             defaults={composerDefaults}
             taskCount={total}
             onAdd={handleAdd}
-            onClearAll={() => dispatch({ type: 'clearAll' })}
+            onCompleteAll={askCompleteAll}
+            onClearAll={askClearAll}
           />
           <TimeTable
             settings={state.settings}
@@ -125,8 +181,8 @@ function App() {
               dispatch({ type: 'restore', id: task.id })
               announce('Moved back to the schedule')
             }}
-            onDelete={task => dispatch({ type: 'delete', id: task.id })}
-            onClear={() => dispatch({ type: 'clearCompleted' })}
+            onDelete={askDelete}
+            onClear={askClearCompleted}
           />
         </aside>
       </main>
@@ -139,6 +195,15 @@ function App() {
           dispatch({ type: 'edit', id, title, day, hour, endHour })
           setEditing(null)
           announce('Task updated')
+        }}
+      />
+
+      <ConfirmDialog
+        request={confirming}
+        onCancel={() => setConfirming(null)}
+        onConfirm={() => {
+          confirming?.run()
+          setConfirming(null)
         }}
       />
 

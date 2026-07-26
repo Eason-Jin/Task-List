@@ -108,6 +108,42 @@ describe('complete and restore', () => {
   })
 })
 
+describe('completeAll', () => {
+  const twoTasks = () => ({
+    ...base(),
+    tasks: [
+      { id: 'a', title: 'workshop', day: 'Tuesday', hour: 9, endHour: 12, completed: false },
+      { id: 'b', title: 'loose end', day: null, hour: null, endHour: null, completed: false }
+    ],
+    completed: [{ id: 'old', title: 'earlier', day: null, hour: 8, endHour: 9, completedAt: 1 }]
+  })
+
+  it('moves every task, including unscheduled ones, into completed', () => {
+    const state = reducer(twoTasks(), { type: 'completeAll' })
+    expect(state.tasks).toEqual([])
+    expect(state.completed.map(t => t.id)).toEqual(['a', 'b', 'old'])
+  })
+
+  it('keeps each task’s day and duration on the way over', () => {
+    const state = reducer(twoTasks(), { type: 'completeAll' })
+    expect(state.completed[0]).toMatchObject({ day: 'Tuesday', hour: 9, endHour: 12 })
+    expect(state.completed[1]).toMatchObject({ day: null, hour: null, endHour: null })
+  })
+
+  it('is undoable', () => {
+    const before = twoTasks()
+    const after = reducer(before, { type: 'completeAll' })
+    const restored = reducer(after, { type: 'undo' })
+    expect(restored.tasks).toEqual(before.tasks)
+    expect(restored.completed).toEqual(before.completed)
+  })
+
+  it('does nothing when there is nothing to complete', () => {
+    const before = { ...base(), completed: [] }
+    expect(reducer(before, { type: 'completeAll' })).toBe(before)
+  })
+})
+
 describe('undo', () => {
   it('restores a deleted multi-hour task exactly', () => {
     const before = withTask()

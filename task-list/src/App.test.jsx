@@ -108,6 +108,20 @@ describe('App', () => {
     expect(html).toContain('--lanes:3')
   })
 
+  it('puts Complete all between Add task and Clear all, disabled when empty', () => {
+    const html = renderToString(<App />)
+
+    const add = html.indexOf('Add task')
+    const completeAll = html.indexOf('Complete all')
+    const clearAll = html.indexOf('Clear all')
+    expect(add).toBeGreaterThan(-1)
+    expect(completeAll).toBeGreaterThan(add)
+    expect(clearAll).toBeGreaterThan(completeAll)
+
+    // Nothing scheduled, so both bulk actions are unavailable.
+    expect(html.slice(completeAll - 120, completeAll)).toContain('disabled')
+  })
+
   it('draws a task written before durations existed as a single row', () => {
     saveStateNow({
       ...defaultState(),

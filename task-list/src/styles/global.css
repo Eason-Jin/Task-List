@@ -129,10 +129,25 @@ input[type='checkbox'] {
   color: var(--text);
 }
 
+/* Quiet until hovered — for controls that sit in the UI all the time. */
 .btn--danger:hover {
   background: var(--danger-soft);
   border-color: var(--danger);
   color: var(--danger);
+}
+
+/* Solid — for the confirming action inside a destructive prompt. */
+.btn--destructive {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.btn--destructive:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  filter: brightness(1.08);
 }
 
 .visually-hidden {

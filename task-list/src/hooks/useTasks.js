@@ -105,6 +105,25 @@ export const reducer = (state, action) => {
       }
     }
 
+    // Bulk version of 'complete': everything on the grid and in the Inbox.
+    case 'completeAll': {
+      if (state.tasks.length === 0) return state
+      const completedAt = Date.now()
+      const moved = state.tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        day: task.day,
+        hour: task.hour,
+        endHour: task.endHour,
+        completedAt
+      }))
+      return withUndo(
+        state,
+        { ...state, tasks: [], completed: [...moved, ...state.completed] },
+        'Completed all tasks'
+      )
+    }
+
     case 'restore': {
       const task = state.completed.find(t => t.id === action.id)
       if (!task) return state

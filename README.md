@@ -45,8 +45,13 @@ npm run preview    # check the built version locally
   reschedule it.
 - **Tick to complete** — a checked task moves to the Completed panel immediately.
   Unticking it there sends it back to its slot on the grid.
-- **Undo** for every destructive action: deleting a task, Clear all, and Clear completed
-  all offer an Undo in the toast.
+- **Complete all** ticks off everything on the schedule at once, including unscheduled
+  tasks.
+- **Confirmation before anything destructive** — deleting a task, Complete all, Clear all
+  and Clear completed each ask first, naming what will happen. Cancel is focused by
+  default, so hitting Enter on reflex is the safe outcome.
+- **Undo** as a second net: deleting a task, Complete all, Clear all and Clear completed
+  all offer an Undo in the toast afterwards.
 - **Light, dark, or system** theme, remembered between visits.
 - **Responsive** — the grid scrolls on its own below ~900px and the Completed panel moves
   underneath it.
