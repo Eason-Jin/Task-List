@@ -1,70 +1,151 @@
-# Getting Started with Create React App
+# Task List — app
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The React app itself. See the [repository README](../README.md) for what it does and how
+to use it; this file covers the build only.
 
-## Available Scripts
+## Commands
 
-In the project directory, you can run:
+Run these from this directory (`task-list/`).
 
-### `npm start`
+| Command | What it does |
+| --- | --- |
+| `npm install` | Install dependencies (once) |
+| `npm run dev` | Dev server at http://localhost:5173 (`npm start` is an alias) |
+| `npm run build` | Static production build into `dist/` |
+| `npm run preview` | Serve the built `dist/` locally to check it |
+| `npm test` | Run the test suite once |
+| `npm run test:watch` | Re-run tests as files change |
+| `npm run test:coverage` | Run with coverage; fails under 90% on any file |
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Layout
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+index.html            Vite entry point
+vite.config.js        base: './' so dist/ works from any path
+src/
+  main.jsx            React root
+  App.jsx             Layout shell, wiring, theme
+  lib/
+    constants.js      Days, hour helpers
+    storage.js        localStorage read/write + v1 -> v2 migration
+  hooks/
+    useTasks.js       Reducer, undo snapshots, per-day lane layout
+  styles/
+    tokens.css        Every design token; the only :root in the codebase
+    global.css        Reset, base elements, .btn / .field primitives
+  components/         One folder per component, each with its own CSS
+```
 
-### `npm test`
+## Data
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Everything lives in `localStorage` under a single key, `tasklist.v2`:
 
-### `npm run build`
+```js
+{
+  version: 3,
+  settings: { startHour, endHour, theme },
+  tasks:     [{ id, title, day, hour, endHour, completed, createdAt }],
+  completed: [{ id, title, day, hour, endHour, completedAt }]
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+`day` is a full English name (`'Monday'`) or `null`; `hour` is a 0–23 integer or `null`.
+A `null` in either field means the task is unscheduled and shows in the Inbox.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`endHour` is **exclusive** and always at least `hour + 1`, so 9→11 covers the 09:00 and
+10:00 rows. It may be 24 for a task in the final slot of the day. `settings.endHour`, by
+contrast, is the last *row* of the grid — hence the `endHour - 1` comparisons in
+`rangeCovering` and `tasksOutsideRange`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`settings.startHour` / `endHour` are edited in `SettingsDialog`, which holds every field as
+a draft and commits only on Save, so Cancel is a true undo. Save is **disabled** while
+`tasksOutsideRange` (in `useTasks.js`) reports anything that would not fit, which is why
+`loadState` no longer widens the stored range to cover every task — the invariant is
+enforced at the point of change instead. `migrateV1` still widens, since v1 data predates
+the setting and must not be hidden behind a range the user never chose.
 
-### `npm run eject`
+The key name still says `v2` because schema 3 only added `endHour`. Every read path fills
+it in (one hour) when it is missing, so installs written by schema 2 upgrade in place
+without another migration and backup cycle.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Migration from v1
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+On first load, `loadState()` detects the old `tasks` / `completedTasks` keys and converts
+them. Before writing anything it copies the originals to `tasklist.v1.backup`, so the
+previous data is recoverable. Tasks the old app saved with an empty time — which it then
+never rendered anywhere — surface in the Unscheduled strip rather than staying invisible.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Migration is the one place a bug would destroy real data, so it is covered by
+`src/lib/storage.test.js`. Run `npm test` after touching `storage.js`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Testing
 
-## Learn More
+`npm run test:coverage` enforces **90% statements, branches, functions and lines per
+file** — `perFile: true`, so a well-covered module cannot mask a bare one. Adding a
+component without tests fails the run.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+There is no @testing-library dependency; `src/test/dom.jsx` has the few helpers the app
+needs. Three things about it are worth knowing before writing a test:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Use `act()`, not `flushSync`.** Drag events are dispatched at React's *continuous*
+  priority and those updates do not flush inside `flushSync`. Every helper wraps `act()`.
+- **React has no `pointerenter` listener.** It synthesises `onPointerEnter` from
+  `pointerover`, and only fires it when `relatedTarget` is outside the tree — hence
+  `pointerEnter()` dispatches `pointerover` with a null `relatedTarget`.
+- **Assigning `node.value` is invisible to React.** It installs its own `value` property on
+  controlled inputs to dedupe changes, so `type()` and `change()` go through the prototype
+  setter instead.
 
-### Code Splitting
+jsdom lacks `HTMLDialogElement.showModal` and `PointerEvent`; `src/test/setup.js` shims
+both. Several dialogs stay mounted and reuse labels like Save and Cancel, so
+`el.button(text, scope)` takes a scope selector.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Grid layout
 
-### Analyzing the Bundle Size
+`TimeTable` is one CSS grid: row 1 is the header, then one row per hour. Background cells
+and task blocks are placed into the same grid explicitly, which is what lets a task span
+rows. Row height is fixed (`--row-h`) because spanning tasks cannot let rows grow to fit
+their content.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+`useTasks` assigns each task a **lane** per day — the first lane free at its start hour —
+and `--lane` / `--lanes` tile the column so overlapping tasks sit side by side.
 
-### Making a Progressive Web App
+Splitting a fixed-width column between lanes does not work: a chip spends ~65px on fixed
+chrome (3px accent border, ~10px padding, 14px checkbox, 18px delete button, gaps) before
+any text, so three lanes in a 132px column leave the title a negative width. Instead each
+day column is sized to hold *its own* lane count at a readable minimum —
+`max(MIN_DAY, lanes * MIN_LANE)` in `columnTemplate` — so only a day that actually has
+overlaps grows, and the grid scrolls horizontally when the week no longer fits.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+`grid-template-columns` is therefore set **inline** from the layout, which is why the
+`@media (max-width: 900px)` block only narrows `--time-col`: anything it declared for
+`grid-template-columns` would lose to the inline style.
 
-### Advanced Configuration
+Titles wrap only at word boundaries (`overflow-wrap: normal`), so a word is never broken
+across lines. A single word too long for its lane is clipped by the line clamp instead, and
+the chip carries a `title` tooltip with the full text.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Both pointer gestures (sweep-to-select a range, drag-the-edge-to-resize) work by reading
+which background cell the pointer is over rather than doing pixel maths, so `.grid--busy`
+sets `pointer-events: none` on task blocks while a gesture or an HTML5 drag is in flight.
 
-### Deployment
+The resize strip sits *inside* the draggable chip, so pressing it would otherwise begin a
+native drag and move the task rather than stretch it. `TaskChip` sets a ref on the handle's
+`pointerdown` and `handleDragStart` refuses the drag while it is set — a ref, not state,
+because the guard has to be visible synchronously before the browser commits to the drag.
+`TaskChip.test.jsx` drives real DOM events over this, since it has regressed twice.
+That class is set on `dragenter`, not `dragstart`, so it also covers a task dragged in from
+the Inbox.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Drop preview
 
-### `npm run build` fails to minify
+Dropping preserves a task's length, so the preview highlights every hour the block would
+occupy, not just the hovered cell. `dataTransfer` *values* cannot be read during `dragover`
+— only the list of type names — so `TaskChip` encodes the length in a second type,
+`text/task-span-<n>`, which `spanFromTypes` parses back out. This keeps the preview
+stateless and works regardless of which component the drag started in.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The outline is drawn edge by edge (`--over-first` / `--over-last`) so a multi-hour range
+reads as one block rather than a stack of separate boxes. `dragleave` is handled on the grid
+container and checks `relatedTarget`, because a per-cell `dragleave` fires *after* the next
+cell's `dragover` and makes the highlight flicker.

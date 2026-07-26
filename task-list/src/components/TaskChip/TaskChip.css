@@ -1,0 +1,164 @@
+.chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  cursor: grab;
+  transition: box-shadow var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+/* Blocks longer than an hour get a tinted fill so the span reads at a glance. */
+.chip--long {
+  background: linear-gradient(var(--accent-soft), var(--accent-soft)) padding-box,
+    var(--surface-raised);
+}
+
+.chip:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.chip:active {
+  cursor: grabbing;
+}
+
+.chip--dragging {
+  opacity: 0.45;
+}
+
+/* Items stretch rather than sitting at flex-start so the title button fills the
+   whole block: on a multi-hour task a content-height button left everything below
+   the first row unclickable. The checkbox and delete button pin themselves to the
+   top instead. */
+.chip__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  padding: 0.25rem 0.3rem 0.25rem 0.35rem;
+  overflow: hidden;
+}
+
+.chip__check {
+  flex: none;
+  align-self: flex-start;
+  width: 14px;
+  height: 14px;
+  margin: 0.15rem 0 0;
+}
+
+.chip__title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  /* Content stays at the top; the button itself still fills the block so the
+     whole thing is a click target. */
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 1px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Wrap only between words — never mid-word. A single word too long for the lane
+   is clipped with an ellipsis by the line clamp instead of being broken up; the
+   full text is on the chip's tooltip. */
+.chip__text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+/* A one-hour block has room for two lines of title but not a meta line too. */
+.chip--long .chip__text {
+  -webkit-line-clamp: 3;
+}
+
+.chip__meta {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chip__delete {
+  flex: none;
+  align-self: flex-start;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--faint);
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease), color var(--duration) var(--ease),
+    background var(--duration) var(--ease);
+}
+
+.chip:hover .chip__delete,
+.chip:focus-within .chip__delete {
+  opacity: 1;
+}
+
+.chip__delete:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* Grab strip along the bottom edge for changing the end time. It must stay above
+   the now full-height title button. */
+.chip__resize {
+  position: absolute;
+  z-index: 1;
+  inset: auto 0 0 0;
+  height: 10px;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.chip__resize::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 22px;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+}
+
+.chip:hover .chip__resize::after {
+  opacity: 0.6;
+}
+
+.chip__resize:hover::after {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .chip__delete {
+    opacity: 1;
+  }
+}
