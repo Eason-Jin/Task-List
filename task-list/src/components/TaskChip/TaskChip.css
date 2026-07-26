@@ -30,11 +30,15 @@
   opacity: 0.45;
 }
 
+/* Items stretch rather than sitting at flex-start so the title button fills the
+   whole block: on a multi-hour task a content-height button left everything below
+   the first row unclickable. The checkbox and delete button pin themselves to the
+   top instead. */
 .chip__body {
   flex: 1;
   min-height: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: var(--space-2);
   padding: 0.25rem 0.3rem 0.25rem 0.35rem;
   overflow: hidden;
@@ -42,6 +46,7 @@
 
 .chip__check {
   flex: none;
+  align-self: flex-start;
   width: 14px;
   height: 14px;
   margin: 0.15rem 0 0;
@@ -52,6 +57,10 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  /* Content stays at the top; the button itself still fills the block so the
+     whole thing is a click target. */
+  justify-content: flex-start;
+  align-items: stretch;
   gap: 1px;
   padding: 0;
   border: 0;
@@ -60,6 +69,7 @@
   font-size: var(--text-sm);
   line-height: 1.3;
   overflow: hidden;
+  cursor: pointer;
 }
 
 /* Wrap only between words — never mid-word. A single word too long for the lane
@@ -89,6 +99,7 @@
 
 .chip__delete {
   flex: none;
+  align-self: flex-start;
   display: grid;
   place-items: center;
   width: 18px;
@@ -113,9 +124,11 @@
   color: var(--danger);
 }
 
-/* Grab strip along the bottom edge for changing the end time. */
+/* Grab strip along the bottom edge for changing the end time. It must stay above
+   the now full-height title button. */
 .chip__resize {
   position: absolute;
+  z-index: 1;
   inset: auto 0 0 0;
   height: 7px;
   cursor: ns-resize;
