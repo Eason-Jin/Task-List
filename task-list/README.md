@@ -97,6 +97,12 @@ the chip carries a `title` tooltip with the full text.
 Both pointer gestures (sweep-to-select a range, drag-the-edge-to-resize) work by reading
 which background cell the pointer is over rather than doing pixel maths, so `.grid--busy`
 sets `pointer-events: none` on task blocks while a gesture or an HTML5 drag is in flight.
+
+The resize strip sits *inside* the draggable chip, so pressing it would otherwise begin a
+native drag and move the task rather than stretch it. `TaskChip` sets a ref on the handle's
+`pointerdown` and `handleDragStart` refuses the drag while it is set — a ref, not state,
+because the guard has to be visible synchronously before the browser commits to the drag.
+`TaskChip.test.jsx` drives real DOM events over this, since it has regressed twice.
 That class is set on `dragenter`, not `dragstart`, so it also covers a task dragged in from
 the Inbox.
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import './TaskChip.css'
 import { formatHour, formatRange, SHORT_DAYS, spanOf } from '../../lib/constants'
 
@@ -74,7 +74,37 @@ const TaskChip = ({
     onNudge(task, delta[0], delta[1])
   }
 
+  /**
+   * The resize strip lives inside the draggable chip, so pressing it would
+   * otherwise start a native drag as soon as the pointer moved — the task would
+   * follow the cursor instead of stretching. A ref rather than state because the
+   * dragstart guard has to see the flag synchronously, before the browser has
+   * committed to the drag.
+   */
+  const resizingRef = useRef(false)
+
+  const handleResizePointerDown = event => {
+    // Keep the cell underneath from starting a range selection, and suppress the
+    // compatibility mousedown that kicks off drag detection.
+    event.stopPropagation()
+    event.preventDefault()
+    resizingRef.current = true
+
+    const clear = () => {
+      resizingRef.current = false
+    }
+    window.addEventListener('pointerup', clear, { once: true })
+    window.addEventListener('pointercancel', clear, { once: true })
+
+    onResizeStart(task, event)
+  }
+
   const handleDragStart = event => {
+    if (resizingRef.current) {
+      // A resize is in progress: refuse the drag outright.
+      event.preventDefault()
+      return
+    }
     event.dataTransfer.setData(DRAG_TYPE, task.id)
     event.dataTransfer.setData(`${SPAN_TYPE}${Math.max(1, spanOf(task))}`, '')
     event.dataTransfer.effectAllowed = 'move'
@@ -147,11 +177,7 @@ const TaskChip = ({
       {onResizeStart && task.hour !== null && (
         <div
           className="chip__resize"
-          onPointerDown={event => {
-            // Stop the cell underneath from starting a range selection.
-            event.stopPropagation()
-            onResizeStart(task, event)
-          }}
+          onPointerDown={handleResizePointerDown}
           aria-hidden="true"
           title={`Drag to change the end time (currently ${formatHour(
             task.endHour ?? task.hour + 1

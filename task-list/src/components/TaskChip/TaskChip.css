@@ -130,7 +130,7 @@
   position: absolute;
   z-index: 1;
   inset: auto 0 0 0;
-  height: 7px;
+  height: 10px;
   cursor: ns-resize;
   touch-action: none;
 }
