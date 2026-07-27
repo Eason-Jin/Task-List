@@ -65,6 +65,17 @@ input[type='checkbox'] {
   cursor: pointer;
 }
 
+/* iOS Safari zooms the whole page on focus for any text input under 16px.
+   Text inputs and selects only need the bump on coarse pointers — the desktop
+   type scale should stay untouched. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: max(1rem, var(--text-base));
+  }
+}
+
 /* Shared control primitives */
 .field {
   background: var(--surface);

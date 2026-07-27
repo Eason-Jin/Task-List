@@ -131,3 +131,15 @@
     opacity: 1;
   }
 }
+
+@media (pointer: coarse) {
+  .done__item input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .done__delete {
+    width: 26px;
+    height: 26px;
+  }
+}
