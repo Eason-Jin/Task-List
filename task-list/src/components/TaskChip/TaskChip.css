@@ -162,3 +162,21 @@
     opacity: 1;
   }
 }
+
+/* Coarse pointers get bigger hit areas on the small controls — 18/14px is fine
+   for a mouse cursor but well under the ~24px a finger can reliably land on. */
+@media (pointer: coarse) {
+  .chip__check {
+    width: 18px;
+    height: 18px;
+  }
+
+  .chip__delete {
+    width: 24px;
+    height: 24px;
+  }
+
+  .chip__resize {
+    height: 16px;
+  }
+}

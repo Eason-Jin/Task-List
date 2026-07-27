@@ -160,6 +160,60 @@ describe('layout', () => {
   })
 })
 
+describe('mobile tabs', () => {
+  const tabs = el => {
+    const [schedule, tasks, settings] = el.$$('.tabbar__btn')
+    return { schedule, tasks, settings }
+  }
+
+  it('starts on the schedule tab', () => {
+    const el = render()
+    const { schedule, tasks } = tabs(el)
+    expect(el.$('.app__main').className).toContain('app__main--schedule')
+    expect(schedule.getAttribute('aria-current')).toBe('page')
+    expect(tasks.getAttribute('aria-current')).toBeNull()
+  })
+
+  it('switches to the merged tasks tab when clicked', () => {
+    const el = render()
+    const { schedule, tasks } = tabs(el)
+
+    click(tasks)
+    expect(el.$('.app__main').className).toContain('app__main--tasks')
+    expect(tasks.getAttribute('aria-current')).toBe('page')
+
+    click(schedule)
+    expect(el.$('.app__main').className).toContain('app__main--schedule')
+  })
+
+  it('opens the settings dialog from its tab instead of switching panels', () => {
+    const el = render()
+    const { schedule, settings } = tabs(el)
+
+    expect(el.$('.settings').open).toBe(false)
+    click(settings)
+    expect(el.$('.settings').open).toBe(true)
+    expect(el.$('.app__main').className).toContain('app__main--schedule')
+    expect(settings.getAttribute('aria-current')).toBe('page')
+    // Only one tab reads as current at a time — opening Settings must drop
+    // Schedule's aria-current even though mobileTab is still 'schedule'.
+    expect(schedule.getAttribute('aria-current')).toBeNull()
+
+    click(schedule)
+    expect(el.$('.settings').open).toBe(false)
+    expect(schedule.getAttribute('aria-current')).toBe('page')
+  })
+
+  it('shows a combined count once there is something unscheduled or completed', () => {
+    seed([{ title: 'unscheduled', day: null, hour: null }])
+    const el = render()
+    expect(tabs(el).tasks.textContent).toContain('Tasks (1)')
+
+    toggle(el.$('.chip__check'))
+    expect(tabs(el).tasks.textContent).toContain('Tasks (1)')
+  })
+})
+
 describe('adding tasks', () => {
   it('adds from the composer and persists it', () => {
     vi.useFakeTimers()

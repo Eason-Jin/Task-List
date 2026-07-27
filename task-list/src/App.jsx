@@ -17,6 +17,7 @@ function App() {
   const [composerDefaults, setComposerDefaults] = useState(null)
   const [confirming, setConfirming] = useState(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [mobileTab, setMobileTab] = useState('schedule')
 
   const { theme } = state.settings
 
@@ -168,7 +169,7 @@ function App() {
         </button>
       </header>
 
-      <main className="app__main">
+      <main className={`app__main app__main--${mobileTab}`}>
         <div className="app__plan">
           <Composer
             settings={state.settings}
@@ -201,6 +202,55 @@ function App() {
           />
         </aside>
       </main>
+
+      {/* Below 900px the header is hidden and each section takes the full
+          space between the top of the screen and this bar instead of all
+          three competing for a slice of the viewport. Settings opens the
+          same dialog the desktop gear button uses rather than switching
+          panels, since it's a one-off action, not a view to stay on. */}
+      <nav className="tabbar" aria-label="Sections">
+        <button
+          type="button"
+          className={`tabbar__btn${
+            !settingsOpen && mobileTab === 'schedule' ? ' tabbar__btn--active' : ''
+          }`}
+          aria-current={!settingsOpen && mobileTab === 'schedule' ? 'page' : undefined}
+          onClick={() => {
+            setSettingsOpen(false)
+            setMobileTab('schedule')
+          }}
+        >
+          <span aria-hidden="true">📅</span>
+          <span>Schedule</span>
+        </button>
+        <button
+          type="button"
+          className={`tabbar__btn${
+            !settingsOpen && mobileTab === 'tasks' ? ' tabbar__btn--active' : ''
+          }`}
+          aria-current={!settingsOpen && mobileTab === 'tasks' ? 'page' : undefined}
+          onClick={() => {
+            setSettingsOpen(false)
+            setMobileTab('tasks')
+          }}
+        >
+          <span aria-hidden="true">📋</span>
+          <span>
+            Tasks{inbox.length + state.completed.length > 0
+              ? ` (${inbox.length + state.completed.length})`
+              : ''}
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`tabbar__btn${settingsOpen ? ' tabbar__btn--active' : ''}`}
+          aria-current={settingsOpen ? 'page' : undefined}
+          onClick={() => setSettingsOpen(true)}
+        >
+          <span aria-hidden="true">⚙</span>
+          <span>Settings</span>
+        </button>
+      </nav>
 
       <TaskEditor
         task={editing}

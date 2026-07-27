@@ -138,6 +138,11 @@ const Composer = ({ settings, onAdd, onCompleteAll, onClearAll, defaults, taskCo
           </select>
         </div>
 
+        {/* Forces the bulk-action buttons onto their own line on narrow
+            screens, where flex-wrap alone can't be relied on to break
+            cleanly between the fields group and the buttons. */}
+        <div className="composer__break" aria-hidden="true" />
+
         <button type="button" className="btn btn--primary" onClick={submit}>
           Add task
         </button>
@@ -159,7 +164,7 @@ const Composer = ({ settings, onAdd, onCompleteAll, onClearAll, defaults, taskCo
           Clear all
         </button>
       </div>
-      <p className="composer__hint" role="status">
+      <p className={`composer__hint${error ? '' : ' composer__hint--tip'}`} role="status">
         {error ||
           'Press Enter to add. Drag down the calendar to block out a range, drag a task’s bottom edge to stretch it.'}
       </p>
