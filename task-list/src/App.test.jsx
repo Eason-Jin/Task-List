@@ -188,13 +188,20 @@ describe('mobile tabs', () => {
 
   it('opens the settings dialog from its tab instead of switching panels', () => {
     const el = render()
-    const { settings } = tabs(el)
+    const { schedule, settings } = tabs(el)
 
     expect(el.$('.settings').open).toBe(false)
     click(settings)
     expect(el.$('.settings').open).toBe(true)
     expect(el.$('.app__main').className).toContain('app__main--schedule')
     expect(settings.getAttribute('aria-current')).toBe('page')
+    // Only one tab reads as current at a time — opening Settings must drop
+    // Schedule's aria-current even though mobileTab is still 'schedule'.
+    expect(schedule.getAttribute('aria-current')).toBeNull()
+
+    click(schedule)
+    expect(el.$('.settings').open).toBe(false)
+    expect(schedule.getAttribute('aria-current')).toBe('page')
   })
 
   it('shows a combined count once there is something unscheduled or completed', () => {

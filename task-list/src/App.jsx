@@ -211,18 +211,28 @@ function App() {
       <nav className="tabbar" aria-label="Sections">
         <button
           type="button"
-          className={`tabbar__btn${mobileTab === 'schedule' ? ' tabbar__btn--active' : ''}`}
-          aria-current={mobileTab === 'schedule' ? 'page' : undefined}
-          onClick={() => setMobileTab('schedule')}
+          className={`tabbar__btn${
+            !settingsOpen && mobileTab === 'schedule' ? ' tabbar__btn--active' : ''
+          }`}
+          aria-current={!settingsOpen && mobileTab === 'schedule' ? 'page' : undefined}
+          onClick={() => {
+            setSettingsOpen(false)
+            setMobileTab('schedule')
+          }}
         >
           <span aria-hidden="true">📅</span>
           <span>Schedule</span>
         </button>
         <button
           type="button"
-          className={`tabbar__btn${mobileTab === 'tasks' ? ' tabbar__btn--active' : ''}`}
-          aria-current={mobileTab === 'tasks' ? 'page' : undefined}
-          onClick={() => setMobileTab('tasks')}
+          className={`tabbar__btn${
+            !settingsOpen && mobileTab === 'tasks' ? ' tabbar__btn--active' : ''
+          }`}
+          aria-current={!settingsOpen && mobileTab === 'tasks' ? 'page' : undefined}
+          onClick={() => {
+            setSettingsOpen(false)
+            setMobileTab('tasks')
+          }}
         >
           <span aria-hidden="true">📋</span>
           <span>
